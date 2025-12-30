@@ -19,11 +19,16 @@
 ## Project Setup
 ### Backend
 cd mcq-backend
+
 composer install
+
 php artisan migrate
+
 php artisan serve
 
 ### Frontend
 cd mcq-frontend
+
 npm install
+
 npm run dev

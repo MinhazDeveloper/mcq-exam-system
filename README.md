@@ -18,20 +18,12 @@
 
 ## Project Setup
 ### Backend
-cd backend
+cd mcq-backend
 composer install
 php artisan migrate
 php artisan serve
 
 ### Frontend
-cd frontend
+cd mcq-frontend
 npm install
 npm run dev
-
-## Assumptions
-- No negative marking
-- One correct answer per question
-
-## Extra Improvements
-- Role-based access
-- Clean API structure

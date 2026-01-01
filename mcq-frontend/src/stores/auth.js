@@ -1,0 +1,29 @@
+import { defineStore } from 'pinia';
+import apiClient from '@/api/axios';
+
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    token: localStorage.getItem('token'),
+    user: JSON.parse(localStorage.getItem('user')),
+  }),
+
+  actions: {
+    setAuth(token, user) {
+      this.token = token;
+      this.user = user;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+    },
+
+    logout() {
+      this.token = null;
+      this.user = null;
+      localStorage.clear();
+    },
+
+    async fetchUser() {
+      const res = await apiClient.get('/user');
+      this.user = res.data;
+    }
+  }
+});

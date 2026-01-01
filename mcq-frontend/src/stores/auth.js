@@ -7,6 +7,11 @@ export const useAuthStore = defineStore('auth', {
     user: JSON.parse(localStorage.getItem('user')),
   }),
 
+  getters: {
+    isAdmin: (state) => state.user?.role === 'admin',
+    isAuthenticated: (state) => !!state.token,
+  },
+
   actions: {
     setAuth(token, user) {
       this.token = token;
@@ -18,7 +23,8 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.token = null;
       this.user = null;
-      localStorage.clear();
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');    
     },
 
     async fetchUser() {

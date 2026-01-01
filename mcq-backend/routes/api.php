@@ -3,6 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ExamController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +30,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+    // for admins
+    Route::middleware('isAdmin')->group(function () {
+        Route::post('/questions', [AdminController::class, 'storeQuestion']);
+        Route::get('/admin/stats', [AdminController::class, 'dashboardStats']);
+    });
+    // for student and admin
+    Route::get('/exams', [ExamController::class, 'index']);
 });
 
 

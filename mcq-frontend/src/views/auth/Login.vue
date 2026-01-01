@@ -76,7 +76,6 @@ const form = reactive({
 
 const isLoading = ref(false);
 
-// সাধারণ ইমেইল-পাসওয়ার্ড লগইন
 const handleLogin = async () => {
   isLoading.value = true;
   try {
@@ -85,7 +84,7 @@ const handleLogin = async () => {
     
     authStore.setAuth(token, user);
 
-    router.push('/dashboard'); // লগইন সফল হলে ড্যাশবোর্ডে পাঠাবে
+    router.push('/dashboard');
   } catch (error) {
     // alert(error.response?.data?.message || 'Login failed. Please try again.');
     
@@ -101,11 +100,9 @@ const handleLogin = async () => {
   }
 };
 
-// গুগল লগইন হ্যান্ডেলার
 const handleGoogleSuccess = async (response) => {
   try {
     const googleToken = response.credential;
-    // আপনার ব্যাকএন্ডে এই টোকেন পাঠিয়ে JWT টোকেন নিন
     const res = await apiClient.post('/auth/google', { token: googleToken });
     
     authStore.setToken(res.data.token);

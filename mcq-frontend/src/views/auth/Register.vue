@@ -41,6 +41,17 @@
             placeholder="********"
           />
         </div>
+        <!-- Password Confirmation -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Password Confirmation</label>
+          <input
+            v-model="form.password_confirmation"
+            type="password"
+            required
+            class="mt-1 w-full border px-3 py-2 rounded text-black"
+            placeholder="********"
+          />
+        </div>
 
         <!-- Submit -->
         <button
@@ -54,7 +65,7 @@
 
       <p class="mt-4 text-center text-sm text-gray-600">
         Already have an account?
-        <router-link to="/login" class="text-indigo-600 font-medium">
+        <router-link to="/" class="text-indigo-600 font-medium">
           Login
         </router-link>
       </p>
@@ -74,6 +85,8 @@ const form = reactive({
   name: '',
   email: '',
   password: '',
+  password_confirmation: '',
+
 })
 
 const handleRegister = async () => {
@@ -81,7 +94,7 @@ const handleRegister = async () => {
   try {
     await apiClient.post('/auth/register', form)
     alert('Registration successful. Please login.')
-    router.push('/login')
+    router.push('/')
   } catch (error) {
     alert(error.response?.data?.message || 'Registration failed')
   } finally {

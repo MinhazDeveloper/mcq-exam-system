@@ -10,7 +10,7 @@ const app = createApp(App);
 app.use(createPinia());
 app.use(router);
 
-// 🔑 এখানে তোমার Google Client ID বসবে
+// google client ID
 app.use(VueGoogleSignIn, {
   clientId: '452296054571-c4rcgj8mn2rmc2jtdhepvkr59j4g1ohc.apps.googleusercontent.com'
 });

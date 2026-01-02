@@ -1,8 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '@/views/auth/Login.vue';
 import Register from '@/views/auth/Register.vue'
-import AdminDashboard from '@/views/admin/AdminDashboard.vue'
-import ExamPage from '@/views/admin/ExamPage.vue'
+// import AdminDashboard from '@/views/admin/AdminDashboard.vue'
+// import ExamPage from '@/views/admin/ExamPage.vue'
+import AdminQuestionForm from '@/views/admin/AdminQuestionForm.vue'
 
 import Dashboard from '@/views/admin/Dashboard.vue';
 import { useAuthStore } from '@/stores/auth';
@@ -21,18 +22,24 @@ const routes = [
     name: 'register',
     component: Register 
   },
+  // { 
+  //   path: '/admin/dashboard', 
+  //   name: 'AdminDashboard',
+  //   component: AdminDashboard,
+  //   meta: { requiresAuth: true, role: 'admin' } 
+  // },
   { 
-    path: '/admin/dashboard', 
-    name: 'AdminDashboard',
-    component: AdminDashboard,
+    path: '/admin/questionform', 
+    name: 'AdminQuestionForm',
+    component: AdminQuestionForm,
     meta: { requiresAuth: true, role: 'admin' } 
   },
-  { 
-    path: '/exam', 
-    name: 'ExamPage',
-    component: ExamPage,
-    meta: { requiresAuth: true, role: 'student' } 
-  },
+  // { 
+  //   path: '/exam', 
+  //   name: 'ExamPage',
+  //   component: ExamPage,
+  //   meta: { requiresAuth: true, role: 'student' } 
+  // },
   {
     path: '/dashboard',
     component: Dashboard,
@@ -49,9 +56,9 @@ router.beforeEach((to, from, next) => {
   const auth = useAuthStore();
 
   // already logged in → login page block
-  if (to.name === 'login' && auth.isAuthenticated) {
-    return next('/dashboard');
-  }
+  // if (to.name === 'login' && auth.isAuthenticated) {
+  //   return next('/dashboard');
+  // }
 
   // auth check
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
@@ -60,12 +67,13 @@ router.beforeEach((to, from, next) => {
 
   // role check
   if (to.meta.role && auth.user?.role !== to.meta.role) {
+    if (auth.user?.role === 'admin') {
+      return next('/admin/questionform');
+    }
     return next('/dashboard');
   }
 
   next();
 });
-
-
 
 export default router;

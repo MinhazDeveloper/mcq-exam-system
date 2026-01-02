@@ -2,7 +2,10 @@
   <div class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
     <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8">
       <h2 class="text-2xl font-bold text-center text-gray-800 mb-8 text-black">Login to Your Account</h2>
-
+      
+      <h1 class="text-4xl text-green-600 font-bold">
+  Tailwind Loaded
+</h1>
       <form @submit.prevent="handleLogin" class="space-y-6">
         <div>
           <label class="block text-sm font-medium text-gray-700">Email Address</label>

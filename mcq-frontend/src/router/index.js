@@ -5,6 +5,7 @@ import Register from '@/views/auth/Register.vue'
 // import ExamPage from '@/views/admin/ExamPage.vue'
 import AdminQuestionForm from '@/views/admin/AdminQuestionForm.vue' 
 import QuestionList from '@/views/admin/QuestionList.vue'
+import StudentExam from '@/views/student/StudentExam.vue'
 
 import Dashboard from '@/views/admin/Dashboard.vue'; 
 import { useAuthStore } from '@/stores/auth';
@@ -48,13 +49,15 @@ const routes = [
     path: '/admin/question/edit/:id',
     name: 'EditQuestion',
     component: AdminQuestionForm,
-    props: true },
-  // { 
-  //   path: '/exam', 
-  //   name: 'ExamPage',
-  //   component: ExamPage,
-  //   meta: { requiresAuth: true, role: 'student' } 
-  // },
+    props: true
+  },
+  //for student exam
+  {
+    path: '/student/exam/:id',
+    name: 'StudentExam',
+    component: StudentExam,
+    meta: { requiresAuth: true }
+  },
   {
     path: '/dashboard',
     component: Dashboard,

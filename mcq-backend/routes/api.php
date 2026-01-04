@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ExamController;
+use App\Http\Controllers\QuestionController;
 
 
 /*
@@ -32,11 +33,23 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     // for admins
     Route::middleware('isAdmin')->group(function () {
-        Route::post('/questions', [AdminController::class, 'storeQuestion']);
-        Route::get('/admin/stats', [AdminController::class, 'dashboardStats']);
+        Route::get('/admin/exams', [ExamController::class, 'getExamList']);
+        Route::get('/admin/question/list', [QuestionController::class, 'index']);
+        Route::get('/admin/question/{id}', [QuestionController::class, 'show']);
+
+        Route::post('/admin/question', [QuestionController::class, 'store']);
+        Route::put('/admin/question/{id}', [QuestionController::class, 'update']);
+        Route::delete('/admin/question/{id}', [QuestionController::class, 'destroy']);
+
+        // Route::put('/admin/questions/edit/{id}', [QuestionController::class, 'update']);
+
+        Route::get('/admin/stats', [QuestionController::class, 'dashboardStats']);
     });
     // for student and admin
     Route::get('/exams', [ExamController::class, 'index']);
+
 });
+
+
 
 

@@ -10,11 +10,18 @@
         </h1>
 
         <!-- Right: Create Question Button -->
-        <router-link
-          to="/admin/questionform"
+        <!-- <router-link
+          to="/student/exam/:id"
           class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md font-semibold transition"
         >
-          Create Question
+          Start Exam
+        </router-link> -->
+
+        <router-link
+          :to="`/student/exam/${exam.id}`"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md font-semibold transition"
+        >
+          Start Exam
         </router-link>
 
       </div>

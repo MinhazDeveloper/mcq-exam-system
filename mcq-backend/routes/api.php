@@ -40,12 +40,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/question', [QuestionController::class, 'store']);
         Route::put('/admin/question/{id}', [QuestionController::class, 'update']);
         Route::delete('/admin/question/{id}', [QuestionController::class, 'destroy']);
-
-        // Route::put('/admin/questions/edit/{id}', [QuestionController::class, 'update']);
-
+        
         Route::get('/admin/stats', [QuestionController::class, 'dashboardStats']);
     });
     // for student and admin
+    Route::get('/student/exams', [ExamController::class, 'index']);
+    Route::get('/student/exams/{id}/questions', [QuestionController::class, 'getQuestionsForStudent']);
+    
     Route::get('/exams', [ExamController::class, 'index']);
 
 });

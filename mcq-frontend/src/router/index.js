@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '@/views/auth/Login.vue';
 import Register from '@/views/auth/Register.vue'
-// import AdminDashboard from '@/views/admin/AdminDashboard.vue'
+import AdminDashboard from '@/views/admin/AdminDashboard.vue'
+import StudentDashboard from '@/views/student/StudentDashboard.vue'
 // import ExamPage from '@/views/admin/ExamPage.vue'
 import AdminQuestionForm from '@/views/admin/AdminQuestionForm.vue' 
 import QuestionList from '@/views/admin/QuestionList.vue'
 import StudentExam from '@/views/student/StudentExam.vue'
 
-import Dashboard from '@/views/admin/Dashboard.vue'; 
 import { useAuthStore } from '@/stores/auth';
 
 const routes = [
@@ -24,12 +24,6 @@ const routes = [
     name: 'register',
     component: Register 
   },
-  // { 
-  //   path: '/admin/dashboard', 
-  //   name: 'AdminDashboard',
-  //   component: AdminDashboard,
-  //   meta: { requiresAuth: true, role: 'admin' } 
-  // },
   //for questionlist
   { 
     path: '/admin/question/list',
@@ -49,7 +43,8 @@ const routes = [
     path: '/admin/question/edit/:id',
     name: 'EditQuestion',
     component: AdminQuestionForm,
-    props: true
+    props: true,
+    meta: { requiresAuth: true, role: 'admin' }
   },
   //for student exam
   {
@@ -59,9 +54,16 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/dashboard',
-    component: Dashboard,
-    meta: { requiresAuth: true }
+    path: '/admin/dashboard',
+    component: AdminDashboard,
+    meta: { requiresAuth: true, role: 'admin' }
+
+  },
+  {
+    path: '/student/dashboard',
+    component: StudentDashboard,
+    meta: { requiresAuth: true, role: 'student' }
+
   }
 ];
 
@@ -76,8 +78,8 @@ router.beforeEach((to, from, next) => {
   //logged in user → block login page
   if (to.name === 'login' && auth.isAuthenticated) {
     return auth.user?.role === 'admin'
-      ? next('/admin/questionform')
-      : next('/dashboard')
+      ? next('/admin/dashboard')
+      : next('/student/dashboard')
   }
   // auth check
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
@@ -92,8 +94,8 @@ router.beforeEach((to, from, next) => {
 
     if (auth.user.role !== to.meta.role) {
       return auth.user.role === 'admin'
-        ? next('/admin/questionform')
-        : next('/dashboard')
+        ? next('/admin/dashboard')
+        : next('/student/dashboard')
     }
   }
 

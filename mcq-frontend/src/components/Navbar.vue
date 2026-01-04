@@ -1,5 +1,8 @@
 <template>
-  <nav class="bg-slate-900 text-white px-6 py-4 shadow-lg">
+  <nav
+    v-if="auth.isAuthenticated"
+    class="bg-slate-900 text-white px-6 py-4 shadow-lg"
+  >
     <div class="flex items-center justify-between">
 
       <!-- Left: Logo / Brand -->
@@ -11,11 +14,6 @@
           MCQ Exam System
         </span>
       </div>
-
-      <!-- Center: Title -->
-      <!-- <h1 class="hidden md:block text-xl font-bold tracking-widest text-gray-200">
-        MCQ EXAM SYSTEM
-      </h1> -->
 
       <!-- Right: Profile -->
       <div class="relative">
@@ -61,22 +59,36 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from '@/api/axios'   // যদি axios instance থাকে
+import { useAuthStore } from '@/stores/auth'
+// import axios from '@/api/axios'
 
 const isOpen = ref(false)
 const router = useRouter()
+const auth = useAuthStore()
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value
 }
-
 const logout = async () => {
-  try {
-    await axios.post('/auth/logout')
-    localStorage.removeItem('token')
-    router.push('/login')
-  } catch (error) {
-    console.error('Logout failed', error)
-  }
+  await auth.logout()
+  isOpen.value = false
+  router.replace('/login')
 }
+// const logout = async () => {
+//   try {
+//     const token = localStorage.getItem('token')
+
+//     await axios.post('/auth/logout', {}, {
+//       headers: {
+//         Authorization: `Bearer ${token}`
+//       }
+//     })
+
+//     localStorage.removeItem('token')
+//     router.push('/login')
+//   } catch (error) {
+//     console.error('Logout failed', error)
+//   }
+// }
+
 </script>

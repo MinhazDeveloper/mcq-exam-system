@@ -44,7 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/stats', [QuestionController::class, 'dashboardStats']);
     });
     // for student and admin
-    Route::get('/student/exams', [ExamController::class, 'index']);
+    Route::get('/student/exams', [ExamController::class, 'getExamList']);
     Route::get('/student/exams/{id}/questions', [QuestionController::class, 'getQuestionsForStudent']);
     
     Route::get('/exams', [ExamController::class, 'index']);

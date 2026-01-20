@@ -51,7 +51,15 @@ class AuthController extends Controller
 
         $user->tokens()->delete();
         $token = $user->createToken('myapptoken')->plainTextToken;
-        return response(['user' => $user, 'token' => $token], 200);
+        return response([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ],
+            'token' => $token
+        ], 200);
     }
 
     //Google Redirect

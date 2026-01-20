@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
-            $table->enum('role', ['admin', 'student'])->default('student');
+            $table->enum('role', ['admin', 'student','instructor'])->default('student');
             $table->string('provider')->default('local'); // google or local
             $table->string('provider_id')->nullable(); // google_id
             $table->rememberToken();

@@ -1,0 +1,12 @@
+<svg width="160" height="36" viewBox="0 0 160 36" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ExamAdmin logo">
+  <g fill="none" fill-rule="evenodd">
+    <g transform="translate(0 2)">
+      <!-- cap icon -->
+      <path d="M16 5.5L8 1 0 5.5l8 4.5 8-4.5z" fill="#6D28D9"/>
+      <path d="M2 11.5v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" stroke="#6D28D9" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- text -->
+      <text x="36" y="19" font-family="Inter, Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#6D28D9">Exam</text>
+      <text x="78" y="19" font-family="Inter, Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#4338CA">Admin</text>
+    </g>
+  </g>
+</svg>

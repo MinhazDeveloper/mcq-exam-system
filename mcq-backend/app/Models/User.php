@@ -8,12 +8,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Submission;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+     
 
 
     /**
@@ -28,7 +30,8 @@ class User extends Authenticatable
         'password',
         'role',
         'provider',
-        'provider_id'
+        'provider_id',
+        'last_login_at'
     ];
 
     public function submissions()
@@ -36,9 +39,13 @@ class User extends Authenticatable
         return $this->hasMany(Submission::class);
     }
 
-    public function isAdmin()
+    // public function isAdmin()
+    // {
+    //     return $this->role === 'admin';
+    // }
+    public function hasRole($role)
     {
-        return $this->role === 'admin';
+        return $this->role === $role; 
     }
 
     /**

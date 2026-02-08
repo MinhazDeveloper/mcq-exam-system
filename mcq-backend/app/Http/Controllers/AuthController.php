@@ -48,10 +48,22 @@ class AuthController extends Controller
                 'message' => 'Please login using Google'
             ], 403);
         }
-
+        // last login time update and old token delete
+        $user->update([
+            'last_login_at' => now()
+        ]);
         $user->tokens()->delete();
+        
         $token = $user->createToken('myapptoken')->plainTextToken;
-        return response(['user' => $user, 'token' => $token], 200);
+        return response([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ],
+            'token' => $token
+        ], 200);
     }
 
     //Google Redirect

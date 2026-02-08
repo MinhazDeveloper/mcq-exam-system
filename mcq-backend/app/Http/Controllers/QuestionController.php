@@ -37,16 +37,7 @@ class QuestionController extends Controller
             return response()->json(['error' => 'Something went wrong: ' . $e->getMessage()], 500);
         }
     }
-    // public function edit($id)
-    // {
-    //     $question = Question::find($id);
-        
-    //     if (!$question) {
-    //         return response()->json(['message' => 'Question not found'], 404);
-    //     }
-        
-    //     return response()->json($question);
-    // }
+    
     public function show($id)
     {
         $question = Question::with('options')->find($id);
@@ -84,5 +75,16 @@ class QuestionController extends Controller
         $question->delete();
 
         return response()->json(['message' => 'Deleted successfully']);
+    }
+    //get question for student
+    public function getQuestionsForStudent($examId)
+    {
+        $questions = Question::with(['options' => function($query) {
+            $query->select('id', 'question_id', 'option_text', 'is_correct'); 
+        }])
+        ->where('exam_id', $examId)
+        ->get();
+
+        return response()->json($questions);
     }
 }

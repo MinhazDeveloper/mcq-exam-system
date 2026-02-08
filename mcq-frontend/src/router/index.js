@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Login from '@/views/auth/Login.vue';
 import Register from '@/views/auth/Register.vue'
 import AdminDashboard from '@/views/admin/AdminDashboard.vue'
+import Users from '@/views/admin/Users.vue'
+import MainLayout from '@/layouts/MainLayout.vue';
+
 import StudentDashboard from '@/views/student/StudentDashboard.vue'
 // import ExamPage from '@/views/admin/ExamPage.vue'
 import AdminQuestionForm from '@/views/admin/AdminQuestionForm.vue' 
@@ -24,6 +27,26 @@ const routes = [
     name: 'register',
     component: Register 
   },
+  //for super admin
+  {
+    path: '/admin',
+    component: MainLayout, // এই লেআউটের ভেতর চাইল্ড পেজগুলো বসবে
+    meta: { requiresAuth: true, role: 'admin' },
+    children: [
+      {
+        path: 'dashboard', 
+        name: 'AdminDashboard',
+        component: AdminDashboard
+      },
+      {
+        path: 'users', 
+        name: 'Users',
+        component: Users
+      },
+      
+    ]
+  },
+
   //for questionlist
   { 
     path: '/admin/question/list',

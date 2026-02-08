@@ -35,15 +35,21 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 /// Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+    // Route::get('/user', function (Request $request) {
+    //     return $request->user();
+    // });
     // email verification notification
     Route::post('/email/verification-notification', [AuthController::class, 'sendVerificationEmail']);
 
     // for admin
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        Route::get('/user/all', [AdminController::class, 'userAll'])->name('admin.userAll');
+        Route::post('/user/store', [AdminController::class, 'storeUser']);
+        Route::put('/user/update/{id}', [AdminController::class, 'updateUser']);
+        // Route::get('/user', function (Request $request) {
+        //     return $request->user();
+        // });
 
     });
     //for instructors

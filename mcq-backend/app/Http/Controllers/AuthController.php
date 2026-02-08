@@ -48,8 +48,12 @@ class AuthController extends Controller
                 'message' => 'Please login using Google'
             ], 403);
         }
-
+        // last login time update and old token delete
+        $user->update([
+            'last_login_at' => now()
+        ]);
         $user->tokens()->delete();
+        
         $token = $user->createToken('myapptoken')->plainTextToken;
         return response([
             'user' => [

@@ -30,7 +30,8 @@ class User extends Authenticatable
         'password',
         'role',
         'provider',
-        'provider_id'
+        'provider_id',
+        'last_login_at'
     ];
 
     public function submissions()

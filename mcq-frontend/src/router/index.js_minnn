@@ -1,0 +1,166 @@
+import { createRouter, createWebHistory } from 'vue-router';
+import Login from '@/views/auth/Login.vue';
+import Register from '@/views/auth/Register.vue'
+import MainLayout from '@/layouts/MainLayout.vue'
+import Dashboard from '@/views/admin/Dashboard.vue'
+// import UserManagement from './views/UserManagement.vue'
+
+
+import AdminDashboard from '@/views/admin/AdminDashboard.vue'
+import StudentDashboard from '@/views/student/StudentDashboard.vue'
+// import ExamPage from '@/views/admin/ExamPage.vue'
+import AdminQuestionForm from '@/views/admin/AdminQuestionForm.vue' 
+import QuestionList from '@/views/admin/QuestionList.vue'
+import StudentExam from '@/views/student/StudentExam.vue'
+
+
+import { useAuthStore } from '@/stores/auth';
+
+
+const routes = [
+  {
+    path: '/',
+    redirect: '/login'
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: Login,
+  },
+  { path: '/register',
+    name: 'register',
+    component: Register 
+  },
+  //dashboard main layout 
+  {
+    path: '/admin',
+    component: MainLayout,
+    meta: { requiresAuth: true, role: 'admin' },
+    children: [
+      {
+        path: 'dashboard',
+        component: Dashboard // Sidebar/Header thakbe, sudhu eti change hobe
+      },
+      {
+        // path: 'users',
+        // component: UserManagement
+      }
+    ]
+  },
+
+  //*************puro kajer por chalu korbo */
+  //for questionlist
+//   { 
+//     path: '/admin/question/list',
+//     name: 'QuestionList',
+//     component: QuestionList, 
+//     meta: { requiresAuth: true, role: 'admin'}
+//   },
+//   //for question create
+//   { 
+//     path: '/admin/questionform', 
+//     name: 'AdminQuestionForm',
+//     component: AdminQuestionForm,
+//     meta: { requiresAuth: true, role: 'admin' } 
+//   },
+//   //for question edit
+//   { 
+//     path: '/admin/question/edit/:id',
+//     name: 'EditQuestion',
+//     component: AdminQuestionForm,
+//     props: true,
+//     meta: { requiresAuth: true, role: 'admin' }
+//   },
+//   //for student exam
+//   {
+//     path: '/student/exam/:id',
+//     name: 'StudentExam',
+//     component: StudentExam,
+//     meta: { requiresAuth: true }
+//   },
+//   // {
+//   //   path: '/admin/dashboard',
+//   //   component: AdminDashboard,
+//   //   meta: { requiresAuth: true, role: 'admin' }
+
+//   // },
+//   {
+//     path: '/student/dashboard',
+//     component: StudentDashboard,
+//     meta: { requiresAuth: true, role: 'student' }
+
+//   }
+];
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+});
+
+// router.beforeEach((to, from, next) => {
+//   const auth = useAuthStore();
+
+//   //logged in user → block login page
+//   if (to.name === 'login' && auth.isAuthenticated) {
+//     return auth.user?.role === 'admin'
+//       ? next('/admin/dashboard')
+//       : next('/student/dashboard')
+//   }
+//   // auth check
+//   if (to.meta.requiresAuth && !auth.isAuthenticated) {
+//     return next('/login');
+//   }
+
+//   // role check
+//   if (to.meta.role) {
+//     if (!auth.user) {
+//       return next('/login')
+//     }
+
+//     if (auth.user.role !== to.meta.role) {
+//       return auth.user.role === 'admin'
+//         ? next('/admin/dashboard')
+//         : next('/student/dashboard')
+//     }
+//   }
+
+//   next();
+// });
+router.beforeEach((to, from, next) => {
+  const auth = useAuthStore();
+
+  // ১. ইউজার ডাটা এবং রোল সেফলি ভ্যারিয়েবলে নিন
+  // optional chaining (?.) ব্যবহার করা হয়েছে যাতে user না থাকলে ক্র্যাশ না করে
+  const userRole = auth.user?.role; 
+  const isAuthenticated = auth.isAuthenticated;
+
+  // ২. লগইন করা ইউজারকে লগইন পেজে যেতে বাধা দিন
+  if (to.name === 'login' && isAuthenticated) {
+    return userRole === 'admin'
+      ? next('/admin/dashboard')
+      : next('/student/dashboard');
+  }
+
+  // ৩. যেসব পেজে অথেন্টিকেশন মাস্ট
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    return next('/login');
+  }
+
+  // ৪. রোল চেক করার লজিক
+  if (to.meta.role) {
+    // যদি লগইন না থাকে বা রোল না পাওয়া যায়
+    if (!isAuthenticated || !userRole) {
+      return next('/login');
+    }
+
+    // যদি ইউজারের রোল রিকোয়ার্ড রোলের সাথে না মিলে
+    if (userRole !== to.meta.role) {
+      return userRole === 'admin'
+        ? next('/admin/dashboard')
+        : next('/student/dashboard');
+    }
+  }
+
+  next();
+});
+export default router;

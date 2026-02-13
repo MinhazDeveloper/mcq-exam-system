@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 class ExamController extends Controller
 {
     
-public function index()
+    public function index()
     {
         $exams = Exam::orderBy('created_at', 'desc')->get();
         
@@ -18,6 +18,16 @@ public function index()
             'data' => $exams
         ], 200);
     }
+    //get exam list for dropdown
+    // public function getExamlist()
+    // {
+    //     $exams = Exam::select('id', 'title')->orderBy('created_at', 'desc')->get();
+        
+    //     return response()->json([
+    //         'success' => true,
+    //         'data' => $exams
+    //     ], 200);
+    // }
 
     /**
      * Store a newly created exam in storage.

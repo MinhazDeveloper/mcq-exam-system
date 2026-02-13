@@ -9,9 +9,9 @@ use App\Http\Requests\StoreQuestionRequest;
 
 class QuestionController extends Controller
 {
-    public function index() {
-
-        return Question::with('options')->latest()->get();
+     public function index() {
+        $questions = Question::with(['options', 'exam'])->orderBy('created_at', 'desc')->get();
+        return response()->json(['success' => true, 'data' => $questions]);
     }
 
     public function store(StoreQuestionRequest $request) {
@@ -23,10 +23,15 @@ class QuestionController extends Controller
                     'exam_id' => $request->exam_id,
                     'question_text' => $request->question_text,
                     'mark' => $request->mark ?? 1,
-                    
+                    'explanation' => $request->explanation,
                 ]);
-
-                $question->options()->createMany($request->options);
+                
+                foreach ($request->options as $opt) {
+                    $question->options()->create([
+                        'option_text' => $opt['text'],
+                        'is_correct' => $opt['is_correct']
+                    ]);
+                }
 
                 return response()->json([
                     'message' => 'Question and options created successfully!',
@@ -37,45 +42,55 @@ class QuestionController extends Controller
             return response()->json(['error' => 'Something went wrong: ' . $e->getMessage()], 500);
         }
     }
-    
-    public function show($id)
-    {
-        $question = Question::with('options')->find($id);
-        
-        if (!$question) {
-            return response()->json(['message' => 'Question not found'], 404);
-        }
-        
-        return response()->json($question);
-    }
-    public function update(Request $request, $id) {
-        $question = Question::findOrFail($id);
-        
-        DB::transaction(function () use ($request, $question) {
-            $question->update([
-                'exam_id' => $request->exam_id,
-                'question_text' => $request->question_text,
-                'mark' => $request->mark
-            ]);
-
-            $question->options()->delete();
-            $question->options()->createMany($request->options);
-        });
-
-        return response()->json(['message' => 'Updated successfully']);
-    }
     public function destroy($id) {
+        $question = Question::findOrFail($id);
+        $question->delete();
+        return response()->json(['success' => true, 'message' => 'Deleted successfully']);
+    }
+    
+    public function update(StoreQuestionRequest $request, $id) 
+    {
         $question = Question::find($id);
 
         if (!$question) {
-            return response()->json(['message' => 'Question not found'], 404);
+            return response()->json(['success' => false, 'message' => 'Question not found'], 404);
         }
 
-        $question->options()->delete(); 
-        $question->delete();
+        try {
+            return DB::transaction(function () use ($request, $question) {
+                
+                $question->update([
+                    'exam_id'       => $request->exam_id,
+                    'question_text' => $request->question_text,
+                    'mark'          => $request->mark,
+                    'explanation'   => $request->explanation,
+                ]);
 
-        return response()->json(['message' => 'Deleted successfully']);
+                
+                $question->options()->delete();
+
+                foreach ($request->options as $opt) {
+                    $question->options()->create([
+                        'option_text' => $opt['text'],
+                        'is_correct'  => $opt['is_correct']
+                    ]);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Question and Options updated successfully!',
+                    'data'    => $question->load('options')
+                ], 200);
+            });
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong!',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
+   
     //get question for student
     public function getQuestionsForStudent($examId)
     {

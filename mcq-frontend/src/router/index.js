@@ -1,9 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '@/views/auth/Login.vue';
 import Register from '@/views/auth/Register.vue'
+import AdminMainLayout from '@/layouts/AdminMainLayout.vue';
 import AdminDashboard from '@/views/admin/AdminDashboard.vue'
 import Users from '@/views/admin/Users.vue'
-import MainLayout from '@/layouts/MainLayout.vue';
+
+
+import InstructorMainLayout from '@/layouts/InstructorMainLayout.vue';
+import InstructorDashboard from '@/views/instructor/InstructorDashboard.vue'
+import InstructorExam from '@/views/instructor/InstructorExam.vue'
+import InstructorQuestion from '@/views/instructor/InstructorQuestion.vue'
 
 import StudentDashboard from '@/views/student/StudentDashboard.vue'
 // import ExamPage from '@/views/admin/ExamPage.vue'
@@ -30,7 +36,7 @@ const routes = [
   //for super admin
   {
     path: '/admin',
-    component: MainLayout, // এই লেআউটের ভেতর চাইল্ড পেজগুলো বসবে
+    component: AdminMainLayout, // এই লেআউটের ভেতর চাইল্ড পেজগুলো বসবে
     meta: { requiresAuth: true, role: 'admin' },
     children: [
       {
@@ -46,6 +52,31 @@ const routes = [
       
     ]
   },
+  //for instructor
+  {
+    path: '/instructor',
+    component: InstructorMainLayout,
+    meta: { requiresAuth: true, role: 'instructor' },
+    children: [
+      {
+        path: 'dashboard', 
+        name: 'InstructorDashboard',
+        component: InstructorDashboard
+      },
+      {
+        path: 'exams', 
+        name: 'InstructorExam',
+        component: InstructorExam
+      },
+
+      {
+        path: 'question', 
+        name: 'InstructorQuestion',
+        component: InstructorQuestion
+      },
+    ]
+  },
+
 
   //for questionlist
   { 
@@ -69,6 +100,7 @@ const routes = [
     props: true,
     meta: { requiresAuth: true, role: 'admin' }
   },
+  
   //for student exam
   {
     path: '/student/exam/:id',
@@ -76,12 +108,12 @@ const routes = [
     component: StudentExam,
     meta: { requiresAuth: true }
   },
-  {
-    path: '/admin/dashboard',
-    component: AdminDashboard,
-    meta: { requiresAuth: true, role: 'admin' }
+  // {
+  //   path: '/admin/dashboard',
+  //   component: AdminDashboard,
+  //   meta: { requiresAuth: true, role: 'admin' }
 
-  },
+  // },
   {
     path: '/student/dashboard',
     component: StudentDashboard,
@@ -95,34 +127,28 @@ const router = createRouter({
   routes
 });
 
+const dashboardMap = {
+  admin: '/admin/dashboard',
+  instructor: '/instructor/dashboard',
+  student: '/student/dashboard'
+}
+
 router.beforeEach((to, from, next) => {
-  const auth = useAuthStore();
+  const auth = useAuthStore()
 
-  //logged in user → block login page
-  if (to.name === 'login' && auth.isAuthenticated) {
-    return auth.user?.role === 'admin'
-      ? next('/admin/dashboard')
-      : next('/student/dashboard')
-  }
-  // auth check
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return next('/login');
+    return next('/login')
   }
 
-  // role check
-  if (to.meta.role) {
-    if (!auth.user) {
-      return next('/login')
-    }
-
-    if (auth.user.role !== to.meta.role) {
-      return auth.user.role === 'admin'
-        ? next('/admin/dashboard')
-        : next('/student/dashboard')
-    }
+  if (to.name === 'login' && auth.isAuthenticated) {
+    return next(dashboardMap[auth.user.role])
   }
 
-  next();
-});
+  if (to.meta.role && auth.user.role !== to.meta.role) {
+    return next(dashboardMap[auth.user.role])
+  }
+
+  next()
+})
 
 export default router;

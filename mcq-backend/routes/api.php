@@ -35,9 +35,9 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 /// Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
-    // Route::get('/user', function (Request $request) {
-    //     return $request->user();
-    // });
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
     // email verification notification
     Route::post('/email/verification-notification', [AuthController::class, 'sendVerificationEmail']);
 
@@ -47,21 +47,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user/all', [AdminController::class, 'userAll'])->name('admin.userAll');
         Route::post('/user/store', [AdminController::class, 'storeUser']);
         Route::put('/user/update/{id}', [AdminController::class, 'updateUser']);
-        // Route::get('/user', function (Request $request) {
-        //     return $request->user();
-        // });
-
+      
     });
     //for instructors
     Route::middleware(['role:instructor'])->prefix('instructor')->group(function () {
         Route::get('/dashboard', [InstructorController::class, 'dashboard'])->name('instructor.dashboard');
+        Route::apiResource('exams', ExamController::class);
+        Route::apiResource('questions', QuestionController::class);
 
-        Route::get('/exams', [ExamController::class, 'getExamList']);
-        Route::get('/question/list', [QuestionController::class, 'index']);
-        Route::get('/question/{id}', [QuestionController::class, 'show']);
-        Route::post('/question', [QuestionController::class, 'store']);
-        Route::put('/question/{id}', [QuestionController::class, 'update']);
-        Route::delete('/question/{id}', [QuestionController::class, 'destroy']);
+        // Route::get('/question/list', [QuestionController::class, 'index']);
+        // Route::get('/question/{id}', [QuestionController::class, 'show']);
+        // Route::post('/question', [QuestionController::class, 'store']);
+        // Route::put('/question/{id}', [QuestionController::class, 'update']);
+        // Route::delete('/question/{id}', [QuestionController::class, 'destroy']);
     });
     //for students
     Route::middleware(['role:student'])->prefix('student')->group(function () {

@@ -86,9 +86,11 @@ const handleLogin = async () => {
     // Role-based redirection
     if (user.role === 'admin') {
       router.push('/admin/dashboard');
-    } else{
+    } else if (user.role === 'instructor') {
+      router.push('/instructor/dashboard');
+    } else {
       router.push('/student/dashboard');
-    } 
+    }
   } catch (error) {
     // alert(error.response?.data?.message || 'Login failed. Please try again.');
     

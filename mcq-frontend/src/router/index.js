@@ -9,6 +9,7 @@ import Users from '@/views/admin/Users.vue'
 import InstructorMainLayout from '@/layouts/InstructorMainLayout.vue';
 import InstructorDashboard from '@/views/instructor/InstructorDashboard.vue'
 import InstructorExam from '@/views/instructor/InstructorExam.vue'
+import InstructorQuestion from '@/views/instructor/InstructorQuestion.vue'
 
 import StudentDashboard from '@/views/student/StudentDashboard.vue'
 // import ExamPage from '@/views/admin/ExamPage.vue'
@@ -54,7 +55,7 @@ const routes = [
   //for instructor
   {
     path: '/instructor',
-    component: InstructorMainLayout, // এই লেআউটের ভেতর চাইল্ড পেজগুলো বসবে
+    component: InstructorMainLayout,
     meta: { requiresAuth: true, role: 'instructor' },
     children: [
       {
@@ -67,7 +68,12 @@ const routes = [
         name: 'InstructorExam',
         component: InstructorExam
       },
-      
+
+      {
+        path: 'question', 
+        name: 'InstructorQuestion',
+        component: InstructorQuestion
+      },
     ]
   },
 
@@ -94,6 +100,7 @@ const routes = [
     props: true,
     meta: { requiresAuth: true, role: 'admin' }
   },
+  
   //for student exam
   {
     path: '/student/exam/:id',
@@ -143,60 +150,5 @@ router.beforeEach((to, from, next) => {
 
   next()
 })
-// router.beforeEach((to, from, next) => {
-//   const auth = useAuthStore();
-
-//   //logged in user → block login page
-//   // if (to.name === 'login' && auth.isAuthenticated) {
-//   //   return auth.user?.role === 'admin'
-//   //     ? next('/admin/dashboard')
-//   //     : next('/student/dashboard')
-//   // }
-//   //
-//   if (to.name === 'login' && auth.isAuthenticated) {
-//   const dashboardMap = {
-//     admin: '/admin/dashboard',
-//     instructor: '/instructor/dashboard',
-//     student: '/student/dashboard'
-//   }
-
-//   return next(dashboardMap[auth.user.role] || '/login')
-// }
-
-//   // auth check
-//   if (to.meta.requiresAuth && !auth.isAuthenticated) {
-//     return next('/login');
-//   }
-
-//   // role check
-//   if (to.meta.role) {
-//     if (!auth.user) {
-//       return next('/login')
-//     }
-
-//     // if (auth.user.role !== to.meta.role) {
-//     //   return auth.user.role === 'admin'
-//     //     ? next('/admin/dashboard')
-//     //     : next('/student/dashboard')
-//     // }
-//     //
-//     if (auth.user.role !== to.meta.role) {
-//       const role = auth.user.role
-
-//       if (role === 'admin') {
-//         return next('/admin/dashboard')
-
-//       } else if (role === 'instructor') {
-//         return next('/instructor/dashboard')
-//       }else {
-//         return next('/student/dashboard')
-//       }
-//     }
-
-
-//   }
-
-//   next();
-// });
 
 export default router;

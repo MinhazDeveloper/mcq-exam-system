@@ -57,7 +57,7 @@
       
       <!-- Question Bank -->
       <router-link
-        to="/admin/exams"
+        to="/instructor/question"
         class="flex items-center gap-3 px-4 py-1 rounded-xl text-black hover:bg-slate-50 transition w-full"
         active-class="active-link"
       >

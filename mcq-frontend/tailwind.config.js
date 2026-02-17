@@ -9,3 +9,9 @@ export default {
   },
   plugins: [],
 }
+module.exports = {
+  safelist: [
+    'bg-green-500',
+    'bg-red-500',
+  ],
+}

@@ -1,102 +1,62 @@
 <template>
   <div class="flex h-screen bg-[#F8FAFC] overflow-hidden">
     <aside class="w-64 bg-white border-r border-slate-200 flex flex-col fixed inset-y-0 left-0 z-20">
-    <!-- Logo -->
-    <div class="p-8 flex items-center gap-3">
-      <div class="text-indigo-600">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-        </svg>
-      </div>
-      <span class="text-xl font-bold text-indigo-600 italic">ExamAdmin</span>
-    </div>
-
-    <!-- Menu -->
-    <nav class="flex-1 px-3 space-y-0.5">
-      <!-- dashboard -->
-      <router-link
-        to="/admin/dashboard"
-        class="flex items-center gap-3 px-4 py-1 rounded-xl text-black hover:bg-slate-50 transition w-full"
-        active-class="active-link"
-      >
-        <!-- Icon box -->
-        <span class="p-2 rounded-lg text-black">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <rect x="3" y="3" width="7" height="7" rx="1" />
-            <rect x="14" y="3" width="7" height="7" rx="1" />
-            <rect x="3" y="14" width="7" height="7" rx="1" />
-            <rect x="14" y="14" width="7" height="7" rx="1" />
-          </svg>
-        </span>
-        <!-- Text -->
-        <span class="text-xs font-medium text-slate-900 tracking-tight">
-          Dashboard
-        </span>
-      </router-link>
-
-      <!-- exams -->       
-      <router-link
-        to="/instructor/exams"
-        class="flex items-center gap-3 px-4 py-1 rounded-xl text-black hover:bg-slate-50 transition w-full"
-        active-class="active-link"
-      >
-        <!-- Icon box -->
-        <span class="p-2 rounded-lg text-black">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <!-- User icon -->
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
-          </svg>
-        </span>
-        <!-- Text -->
-        <span class="text-xs font-medium text-slate-900 tracking-tight">
-          Exams
-        </span>
-      </router-link>
-      
-      <!-- Question Bank -->
-      <router-link
-        to="/instructor/question"
-        class="flex items-center gap-3 px-4 py-1 rounded-xl text-black hover:bg-slate-50 transition w-full"
-        active-class="active-link"
-      >
-        <span class="p-2 rounded-lg text-black icon-container">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <!-- Logo -->
+      <div class="p-8 flex items-center gap-3">
+        <div class="text-indigo-600">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
           </svg>
-        </span>
-        
-        <span class="text-xs font-medium text-slate-900 tracking-tight">
-          Question Bank
-        </span>
-      </router-link>
-    </nav>
+        </div>
+        <span class="text-xl font-bold text-indigo-600 italic">Intellecta</span>
+      </div>
 
-    <div class="mt-auto bg-white border-t border-slate-100 p-4">
-      <!-- <button @click="handleLogout" class="flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl text-rose-600 hover:bg-rose-50 transition">
-        <span class="p-2 bg-rose-50 rounded-lg text-rose-600">⤴️</span>
-        <span class="text-xs font-medium">Logout</span>
-      </button> -->
-
-      <button 
-        @click="handleLogout" 
-        class="flex items-center gap-3 px-4 py-2 w-full group transition-all duration-200"
-      >
-        <span class="text-xs transition-transform group-hover:-translate-x-1">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-        </span>
+      <!-- Menu -->
+      <nav class="flex-1 px-3 space-y-0.5">
+        <!-- exams -->       
+        <router-link
+          to="/student/dashboard"
+          class="nav-link"
+          active-class="active-link"
+        >
+          <div class="icon-container"><FileText :size="18" /></div>
+          <span class="text-sm font-medium tracking-tight">Enrolled Exams</span>
+        </router-link>
         
-        <span class="text-sm font-bold text-rose-500 tracking-wide">
-          Logout
-        </span>
-      </button>
-    </div>
-  </aside>
+        <!-- Exam history -->
+        <router-link
+          to="/student/exam-history"
+          class="flex items-center gap-3 px-4 py-1 rounded-xl text-black hover:bg-slate-50 transition w-full"
+          active-class="active-link"
+        >
+          <div class="icon-container"><History :size="18" /></div>
+          <span class="text-sm font-medium tracking-tight">Exam History</span>
+        </router-link>
+      </nav>
+
+      <div class="mt-auto bg-white border-t border-slate-100 p-4">
+        <!-- <button @click="handleLogout" class="flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl text-rose-600 hover:bg-rose-50 transition">
+          <span class="p-2 bg-rose-50 rounded-lg text-rose-600">⤴️</span>
+          <span class="text-xs font-medium">Logout</span>
+        </button> -->
+
+        <button 
+          @click="handleLogout" 
+          class="flex items-center gap-3 px-4 py-2 w-full group transition-all duration-200"
+        >
+          <span class="text-xs transition-transform group-hover:-translate-x-1">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </span>
+          
+          <span class="text-sm font-bold text-rose-500 tracking-wide">
+            Logout
+          </span>
+        </button>
+      </div>
+    </aside>
     
 
     <div class="flex-1 flex flex-col ml-64"> 
@@ -184,9 +144,10 @@
 </template>
 
 <script setup>
-import Header from '@/components/instructor/InstructorHeader.vue'
+import Header from '@/components/student/StudentHeader.vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { LayoutDashboard, FileText, History } from 'lucide-vue-next';
 
 const router = useRouter()
 const auth = useAuthStore()

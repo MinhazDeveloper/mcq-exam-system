@@ -11,17 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-       Schema::create('exams', function (Blueprint $table) {
+        Schema::create('submission_answers', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->text('subject')->nullable();
-            $table->integer('total_marks');
-            $table->integer('pass_marks')->default(0);
-            $table->integer('duration_minutes'); // exam time
-            $table->boolean('is_published')->default(false);
+            $table->foreignId('submission_id')->constrained()->onDelete('cascade');
+            $table->foreignId('question_id')->constrained();
+            $table->foreignId('option_id')->nullable(); 
+            $table->boolean('is_correct')->default(false);
             $table->timestamps();
         });
-
     }
 
     /**
@@ -29,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('exams');
+        Schema::dropIfExists('submission_answer');
     }
 };

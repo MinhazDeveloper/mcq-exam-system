@@ -3,58 +3,29 @@
     <main class="flex-1 overflow-y-auto">
       <div class="p-10">
         <div class="grid grid-cols-4 gap-6 mb-10">
-          <!-- <div v-for="stat in stats" :key="stat.title" class="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm"> -->
-          <div v-for="stat in stats" class="bg-white p-7 rounded-[32px] border border-slate-50 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-md transition-all duration-300">
-            <div class="flex justify-between items-start mb-4">
-              <!-- <div :class="stat.bgColor" class="p-3 rounded-xl text-white flex items-center justify-center">
-                <svg v-if="stat.icon === 'user'" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 1.2c-3.6 0-10.8 1.8-10.8 5.4v2.4H22.8v-2.4c0-3.6-7.2-5.4-10.8-5.4z"/>
-                </svg>
-                <svg v-else-if="stat.icon === 'book'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 7a2 2 0 012-2h7v12H4a2 2 0 01-2-2V7z" />
-                  <path d="M21 5a2 2 0 00-2-2h-7v12h7a2 2 0 002-2V5z" />
-                </svg>
-                <svg v-else-if="stat.icon === 'graduation'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 14l9-5-9-5-9 5 9 5z" />
-                  <path d="M12 14v7" />
-                  <path d="M12 14l6.16-3.422" />
-                </svg>
-                <svg v-else-if="stat.icon === 'money'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M3 7h18v10H3zM7 11a2 2 0 100 4 2 2 0 000-4z"/>
-                </svg>
-              </div> -->
-
-              <div :class="stat.bgColor" class="p-3 rounded-xl text-white flex items-center justify-center">
-  
-                <!-- ✅ যদি icon string হয় (user/book/money), তাহলে SVG দেখাবে -->
-                <svg v-if="stat.icon === 'user'" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 1.2c-3.6 0-10.8 1.8-10.8 5.4v2.4H22.8v-2.4c0-3.6-7.2-5.4-10.8-5.4z"/>
-                </svg>
-
-                <svg v-else-if="stat.icon === 'book'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 7a2 2 0 012-2h7v12H4a2 2 0 01-2-2V7z" />
-                  <path d="M21 5a2 2 0 00-2-2h-7v12h7a2 2 0 002-2V5z" />
-                </svg>
-
-                <svg v-else-if="stat.icon === 'money'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M3 7h18v10H3zM7 11a2 2 0 100 4 2 2 0 000-4z"/>
-                </svg>
-
-                <!-- ✅ যদি icon string না হয়ে image হয় (Total Attempts), তাহলে <img> দেখাবে -->
-                <img
-                  v-else
-                  :src="stat.icon"
-                  class="w-6 h-6 object-contain"
-                  alt="icon"
-                />
+          <div v-for="stat in stats" :key="stat.title" class="bg-white p-7 rounded-[32px] border border-slate-50 shadow-sm relative overflow-hidden">
+            
+            <div v-if="loading" class="animate-pulse">
+              <div class="flex justify-between mb-4">
+                <div class="w-12 h-12 bg-slate-200 rounded-xl"></div>
+                <div class="w-10 h-5 bg-slate-100 rounded-full"></div>
               </div>
-
-              <span :class="stat.trend.includes('+') ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-400'" class="text-xs font-bold px-2 py-1 rounded-full">
-                {{ stat.trend }}
-              </span>
+              <div class="h-4 bg-slate-100 rounded w-1/2 mb-2"></div>
+              <div class="h-8 bg-slate-200 rounded w-3/4"></div>
             </div>
-            <p class="text-sm text-slate-400 font-medium">{{ stat.title }}</p>
-            <h2 class="text-2xl font-black mt-1">{{ stat.value }}</h2>
+
+            <div v-else>
+              <div class="flex justify-between items-start mb-6">
+                <div :class="stat.bgColor" class="w-12 h-12 rounded-[18px] text-white flex items-center justify-center">
+                  <component :is="stat.icon" :size="24" stroke-width="2.2" />
+                </div>
+                <span :class="stat.trend.includes('+') ? 'bg-green-50 text-green-500' : 'bg-red-50 text-red-400'" class="text-xs font-bold px-2.5 py-1 rounded-full">
+                  {{ stat.trend }}
+                </span>
+              </div>
+              <p class="text-[14px] text-slate-400 font-medium tracking-tight">{{ stat.title }}</p>
+              <h2 class="text-2xl font-bold text-slate-900 mt-1">{{ stat.value }}</h2>
+            </div>
           </div>
         </div>
 
@@ -136,18 +107,23 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { Users, BookOpen, GraduationCap, DollarSign } from 'lucide-vue-next';
 
-import graduationIcon from '@/assets/icons/total_attempts_icon.JPG'
-
-// (স্ক্রিপ্ট সেকশন আগের মতোই থাকবে)
-const stats = [
-  { title: 'Total Students', value: '372', trend: '+12%', icon: 'user', bgColor: 'bg-blue-500' },
-  { title: 'Total Exams', value: '40', trend: '+5%', icon: 'book', bgColor: 'bg-indigo-500' },
-  // { title: 'Total Attempts', value: '1,284', trend: '-2%', icon: 'graduation', bgColor: 'bg-purple-500' },
-    { title: 'Total Attempts', value: '1,284', trend: '-2%', icon: graduationIcon, bgColor: 'bg-purple-500' },
-
-  { title: 'Total Revenue', value: '$48,290', trend: '+8%', icon: 'money', bgColor: 'bg-emerald-500' },
-];
+const stats = ref([
+  { title: 'Total Students', value: '0', trend: '0%', icon: Users, bgColor: 'bg-blue-500', key: 'total_students' },
+  { title: 'Total Exams', value: '0', trend: '0%', icon: BookOpen, bgColor: 'bg-indigo-500', key: 'total_exams' },
+  { title: 'Total Attempts', value: '0', trend: '0%', icon: GraduationCap, bgColor: 'bg-purple-500', key: 'total_attempts' },
+  { title: 'Total Revenue', value: '$0', trend: '0%', icon: DollarSign, bgColor: 'bg-emerald-500', key: 'total_revenue' },
+]);
+// const stats = [
+//   { title: 'Total Students', value: '372', trend: '+12%', icon: Users, bgColor: 'bg-blue-500' },
+//   { title: 'Total Exams', value: '40', trend: '+5%', icon: BookOpen, bgColor: 'bg-indigo-500' },
+//   { title: 'Total Attempts', value: '1,284', trend: '-2%', icon: GraduationCap, bgColor: 'bg-purple-500' },
+//   { title: 'Total Revenue', value: '$48,290', trend: '+8%', icon: DollarSign, bgColor: 'bg-emerald-500' },
+// ];
+const loading = ref(true);
 
 const todayExams = [
   { id: 1, name: 'Introduction to Compute...', time: '10:00 AM', students: 45, status: 'Ongoing' },
@@ -172,4 +148,37 @@ const statusBadgeClass = (status) => {
   };
   return styles[status] || 'bg-slate-100 text-slate-500';
 };
+
+const fetchDashboardStats = async () => {
+  try {
+    loading.value = true;
+    const token = localStorage.getItem('token');
+    const response = await axios.get('http://127.0.0.1:8000/api/admin/dashboard-stats', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (response.data.success) {
+      const data = response.data.data;
+      
+      // এপিআই থেকে আসা ডাটা দিয়ে stats আপডেট করা
+      stats.value[0].value = data.total_students;
+      stats.value[0].trend = `+${data.students_trend}%`;
+      
+      stats.value[1].value = data.total_exams;
+      stats.value[1].trend = `+${data.exams_trend}%`;
+      
+      stats.value[2].value = data.total_attempts;
+      stats.value[3].value = `$${data.total_revenue}`;
+    }
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchDashboardStats();
+});
+
 </script>

@@ -55,18 +55,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('exams', ExamController::class);
         Route::apiResource('questions', QuestionController::class);
 
-        // Route::get('/question/list', [QuestionController::class, 'index']);
-        // Route::get('/question/{id}', [QuestionController::class, 'show']);
-        // Route::post('/question', [QuestionController::class, 'store']);
-        // Route::put('/question/{id}', [QuestionController::class, 'update']);
-        // Route::delete('/question/{id}', [QuestionController::class, 'destroy']);
     });
     //for students
     Route::middleware(['role:student'])->prefix('student')->group(function () {
         Route::get('/dashboard', [StudentController::class, 'dashboard'])->name('student.dashboard');
         Route::get('/exams', [ExamController::class, 'getExamList']);
+        Route::get('/exam-result/{id}', [ExamController::class, 'getResult']);
+        Route::get('/exam-history', [ExamController::class, 'getExamHistory']);
+
         Route::get('/exams/{id}/questions', [QuestionController::class, 'getQuestionsForStudent']);
-        Route::get('/exams/list', [ExamController::class, 'index']);
+        Route::post('exam/submit', [ExamController::class, 'ExamSubmit']);
+        // Route::get('/exams/list', [ExamController::class, 'index']);
     });
 
 });

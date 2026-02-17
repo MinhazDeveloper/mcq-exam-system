@@ -11,11 +11,26 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Schema::create('submissions', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        //     $table->foreignId('exam_id')->constrained()->onDelete('cascade');
+        //     $table->integer('obtained_marks')->default(0);
+        //     $table->integer('time_taken')->nullable();
+        //     $table->timestamp('submitted_at')->useCurrent();
+        //     $table->timestamps();
+        // });
+
         Schema::create('submissions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('exam_id')->constrained()->onDelete('cascade');
-            $table->integer('obtained_marks')->default(0);
+            
+            $table->integer('total_questions')->default(0); 
+            $table->integer('correct_answers')->default(0); 
+            $table->integer('wrong_answers')->default(0);   
+            $table->integer('obtained_marks')->default(0); 
+            
             $table->integer('time_taken')->nullable();
             $table->timestamp('submitted_at')->useCurrent();
             $table->timestamps();

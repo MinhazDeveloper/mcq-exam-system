@@ -9,11 +9,15 @@ use App\Models\Answer;
 
 class Submission extends Model
 {
-    protected $fillable = ['user_id', 'exam_id', 'obtained_marks', 'time_taken'];
+    protected $fillable = [
+        'user_id', 'exam_id', 'total_questions', 'correct_answers', 
+        'wrong_answers', 'obtained_marks', 'time_taken', 'submitted_at'
+    ];
 
     protected $casts = [
         'obtained_marks' => 'integer',
-        'time_taken' => 'integer', // if storing time in minutes or seconds
+        'time_taken' => 'integer', // storing time in minutes or seconds
+        'submitted_at' => 'datetime',
     ];
 
     public function user()
@@ -26,10 +30,10 @@ class Submission extends Model
         return $this->belongsTo(Exam::class);
     }
 
-    // 1 submission has many answer
-    public function answers()
+    //submission has many answer
+    public function submissionAnswers()
     {
-        return $this->hasMany(Answer::class);
+        return $this->hasMany(SubmissionAnswer::class);
     }
-
+    
 }

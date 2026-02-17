@@ -1,17 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Login from '@/views/auth/Login.vue';
 import Register from '@/views/auth/Register.vue'
+//admin
 import AdminMainLayout from '@/layouts/AdminMainLayout.vue';
 import AdminDashboard from '@/views/admin/AdminDashboard.vue'
 import Users from '@/views/admin/Users.vue'
-
-
+//instructor
 import InstructorMainLayout from '@/layouts/InstructorMainLayout.vue';
 import InstructorDashboard from '@/views/instructor/InstructorDashboard.vue'
 import InstructorExam from '@/views/instructor/InstructorExam.vue'
 import InstructorQuestion from '@/views/instructor/InstructorQuestion.vue'
+//student
+import StudentMainLayout from '@/layouts/StudentMainLayout.vue';
+// import StudentDashboard from '@/views/student/StudentDashboard.vue'
+import StudentExamList from '@/views/student/StudentExamList.vue'
+import ExamResult from '@/views/student/ExamResult.vue'
+import ExamHistory from '@/views/student/ExamHistory.vue'
 
-import StudentDashboard from '@/views/student/StudentDashboard.vue'
 // import ExamPage from '@/views/admin/ExamPage.vue'
 import AdminQuestionForm from '@/views/admin/AdminQuestionForm.vue' 
 import QuestionList from '@/views/admin/QuestionList.vue'
@@ -36,7 +41,7 @@ const routes = [
   //for super admin
   {
     path: '/admin',
-    component: AdminMainLayout, // এই লেআউটের ভেতর চাইল্ড পেজগুলো বসবে
+    component: AdminMainLayout,
     meta: { requiresAuth: true, role: 'admin' },
     children: [
       {
@@ -76,50 +81,42 @@ const routes = [
       },
     ]
   },
-
-
-  //for questionlist
-  { 
-    path: '/admin/question/list',
-    name: 'QuestionList',
-    component: QuestionList, 
-    meta: { requiresAuth: true, role: 'admin'}
-  },
-  //for question create
-  { 
-    path: '/admin/questionform', 
-    name: 'AdminQuestionForm',
-    component: AdminQuestionForm,
-    meta: { requiresAuth: true, role: 'admin' } 
-  },
-  //for question edit
-  { 
-    path: '/admin/question/edit/:id',
-    name: 'EditQuestion',
-    component: AdminQuestionForm,
-    props: true,
-    meta: { requiresAuth: true, role: 'admin' }
-  },
-  
-  //for student exam
+  //for student
   {
-    path: '/student/exam/:id',
-    name: 'StudentExam',
-    component: StudentExam,
-    meta: { requiresAuth: true }
+    path: '/student',
+    component: StudentMainLayout,
+    meta: { requiresAuth: true, role: 'student' },
+    children: [
+      // {
+      //   path: 'dashboard', 
+      //   name: 'StudentDashboard',
+      //   component: StudentDashboard
+      // },
+      {
+        path: 'dashboard', 
+        name: 'StudentExams',
+        component: StudentExamList
+      },
+      {
+        path: 'exam/:id',
+        name: 'StudentExam',
+        component: StudentExam,
+        props: true // ✅ id props হিসেবে পাঠাবে
+      },
+      {
+        path: 'exam-result/:id',
+        name: 'ExamResult',
+        component: ExamResult, 
+        props: true
+      },
+      {
+        path: 'exam-history', 
+        name: 'ExamHistory',
+        component: ExamHistory
+      },
+
+    ]
   },
-  // {
-  //   path: '/admin/dashboard',
-  //   component: AdminDashboard,
-  //   meta: { requiresAuth: true, role: 'admin' }
-
-  // },
-  {
-    path: '/student/dashboard',
-    component: StudentDashboard,
-    meta: { requiresAuth: true, role: 'student' }
-
-  }
 ];
 
 const router = createRouter({

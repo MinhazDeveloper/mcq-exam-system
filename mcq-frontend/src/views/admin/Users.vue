@@ -3,7 +3,10 @@
   <div class="space-y-6">
     <div class="flex justify-between items-center">
       <div>
-        <h2 class="text-xl font-black text-slate-800">User Management</h2>
+        <!-- <h2 class="text-xl font-black text-slate-800">User Management</h2> -->
+        <h6 class="text-[22px] font-bold text-[#0F172A] tracking-tight">User Management</h6>
+
+
         </div>
       <div class="flex gap-3">
         <button @click="isModalOpen = true; selectedUser = null" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 rounded-xl text-sm font-bold text-white hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition">

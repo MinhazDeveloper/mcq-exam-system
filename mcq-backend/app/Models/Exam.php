@@ -9,7 +9,7 @@ use App\Models\Submission;
 
 class Exam extends Model
 {
-    protected $fillable = ['title', 'description', 'total_marks', 'pass_marks', 'duration_minutes', 'is_published'];
+    protected $fillable = ['title', 'subject', 'total_marks', 'pass_marks', 'duration_minutes', 'is_published'];
 
     protected $casts = [
         'is_published' => 'boolean',

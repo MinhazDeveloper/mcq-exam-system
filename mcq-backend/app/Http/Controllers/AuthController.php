@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
@@ -54,6 +55,15 @@ class AuthController extends Controller
         ]);
         $user->tokens()->delete();
         
+        // Activity log save
+        ActivityLog::create([
+            'user_id'    => $user->id,
+            'user_name'  => $user->name,
+            'action'     => 'User Login',
+            'ip_address' => $request->ip(),
+            'status'     => 'Success'
+        ]);
+
         $token = $user->createToken('myapptoken')->plainTextToken;
         return response([
             'user' => [

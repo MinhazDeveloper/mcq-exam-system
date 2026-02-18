@@ -63,8 +63,8 @@
               <input v-model="form.title" type="text" class="w-full px-4 py-2.5 rounded-xl border border-slate-200" required />
             </div>
             <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-1.5">Description</label>
-              <textarea v-model="form.description" rows="3" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></textarea>
+              <label class="block text-sm font-semibold text-slate-700 mb-1.5">Subject</label>
+              <textarea v-model="form.subject" rows="3" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></textarea>
             </div>
             <div class="grid grid-cols-2 gap-4">
               <input v-model="form.total_marks" type="number" placeholder="Total Marks" class="w-full px-4 py-2.5 rounded-xl border border-slate-200" required />
@@ -106,7 +106,7 @@ const statusClasses = {
 
 const form = reactive({
   title: '',
-  description: '',
+  subject: '',
   total_marks: null,
   pass_marks: null,
   duration_minutes: null,
@@ -130,7 +130,7 @@ const fetchExams = async () => {
 
 const openModalForCreate = () => {
   isEditMode.value = false;
-  Object.assign(form, { title: '', description: '', total_marks: null, pass_marks: null, duration_minutes: null, is_published: false });
+  Object.assign(form, { title: '', subject: '', total_marks: null, pass_marks: null, duration_minutes: null, is_published: false });
   isModalOpen.value = true;
 }
 
@@ -140,7 +140,7 @@ const openModalForEdit = (exam) => {
   
   Object.assign(form, {
     title: exam.title,
-    description: exam.description,
+    subject: exam.subject,
     total_marks: exam.total_marks,
     pass_marks: exam.pass_marks,
     duration_minutes: exam.duration_minutes,

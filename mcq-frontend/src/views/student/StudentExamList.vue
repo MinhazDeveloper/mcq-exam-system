@@ -1,5 +1,5 @@
 <template>
-  <div class="p-8 bg-gray-50 min-h-screen font-sans">
+  <div class="p-8 bg-gray-50 min-h-screen ">
     <div class="mb-8">
       <!-- <h1 class="text-2xl font-extrabold text-[#111827]">Enrolled Exams</h1> -->
       <h6 class="text-[22px] font-bold text-[#0F172A] tracking-tight">Enrolled Exams</h6>

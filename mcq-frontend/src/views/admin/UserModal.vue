@@ -19,7 +19,7 @@
           <select v-model="formData.role" class="w-full mt-1 px-5 py-3 bg-slate-50 text-black rounded-2xl">
             <option value="student">Student</option>
             <option value="instructor">Instructor</option>
-            <!-- <option value="admin">Admin</option> -->
+            <option value="admin">Admin</option>
           </select>
         </div>
 

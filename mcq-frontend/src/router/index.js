@@ -5,6 +5,7 @@ import Register from '@/views/auth/Register.vue'
 import AdminMainLayout from '@/layouts/AdminMainLayout.vue';
 import AdminDashboard from '@/views/admin/AdminDashboard.vue'
 import Users from '@/views/admin/Users.vue'
+import AdminExam from '@/views/admin/AdminExam.vue'
 //instructor
 import InstructorMainLayout from '@/layouts/InstructorMainLayout.vue';
 import InstructorDashboard from '@/views/instructor/InstructorDashboard.vue'
@@ -53,6 +54,11 @@ const routes = [
         path: 'users', 
         name: 'Users',
         component: Users
+      },
+      {
+        path: 'exams', 
+        name: 'AdminExam',
+        component: AdminExam
       },
       
     ]

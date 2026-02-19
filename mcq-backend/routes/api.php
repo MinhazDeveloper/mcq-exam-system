@@ -48,6 +48,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user/all', [AdminController::class, 'userAll'])->name('admin.userAll');
         Route::post('/user/store', [AdminController::class, 'storeUser']);
         Route::put('/user/update/{id}', [AdminController::class, 'updateUser']);
+        Route::delete('/user/delete/{id}', [AdminController::class, 'destroy']);
+        Route::get('/exams', [ExamController::class, 'getExamlist']);
       
     });
     //for instructors

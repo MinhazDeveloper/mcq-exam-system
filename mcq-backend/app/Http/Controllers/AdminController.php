@@ -94,12 +94,33 @@ class AdminController extends Controller
             'data'    => $user
         ], 200);
     }
-    public function dashboard()
+    // delete user
+    public function destroy($id)
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Welcome admin',
-        ]);
+        try {
+            $user = User::find($id);
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+
+            $user->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Something went wrong!',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
     // dashboard stats
     public function getStats()
@@ -109,15 +130,15 @@ class AdminController extends Controller
         // $totalAttempts = Attempt::count();
         // $totalRevenue = Payment::where('status', 'success')->sum('amount');
 
-        // গত ৭ দিনের রেজিস্ট্রেশন ডাটা সংগ্রহ
+       
         $registrations = User::where('role', 'student')
-            ->where('created_at', '>=', now()->subDays(6)) // আজসহ মোট ৭ দিন
+            ->where('created_at', '>=', now()->subDays(6))
             ->selectRaw('DATE(created_at) as date, count(*) as count')
             ->groupBy('date')
             ->orderBy('date', 'ASC')
             ->get();
 
-        // চার্টের জন্য ডাটা ফরম্যাট করা (যাতে কোনো দিন গ্যাপ থাকলে ০ দেখায়)
+        
         $chartData = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->format('Y-m-d');
@@ -160,7 +181,7 @@ class AdminController extends Controller
                 ];
             });
 
-        // ৩. ফাইনাল রেসপন্স
+        
         return response()->json([
             "success" => true,
             "data" => [
@@ -170,7 +191,7 @@ class AdminController extends Controller
                 "registration_trend" => $chartData,
                 "exams_today" => $examsToday,
                 'recent_activities' => $recentActivities
-                // "exams_trend" => 5, // এটিও একইভাবে ক্যালকুলেট করতে পারেন
+                // "exams_trend" => 5, 
                 // "total_attempts" => $totalAttempts,
                 // "total_revenue" => $totalRevenue
             ]

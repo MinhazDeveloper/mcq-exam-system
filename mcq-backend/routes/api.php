@@ -43,10 +43,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // for admin
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        // Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+        Route::get('/dashboard-stats', [AdminController::class, 'getStats']);
         Route::get('/user/all', [AdminController::class, 'userAll'])->name('admin.userAll');
         Route::post('/user/store', [AdminController::class, 'storeUser']);
         Route::put('/user/update/{id}', [AdminController::class, 'updateUser']);
+        Route::delete('/user/delete/{id}', [AdminController::class, 'destroy']);
+        Route::get('/exams', [ExamController::class, 'getExamlist']);
       
     });
     //for instructors
@@ -65,7 +68,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/exams/{id}/questions', [QuestionController::class, 'getQuestionsForStudent']);
         Route::post('exam/submit', [ExamController::class, 'ExamSubmit']);
-        // Route::get('/exams/list', [ExamController::class, 'index']);
+
     });
 
 });

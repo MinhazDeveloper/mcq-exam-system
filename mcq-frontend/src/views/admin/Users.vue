@@ -3,11 +3,8 @@
   <div class="space-y-6">
     <div class="flex justify-between items-center">
       <div>
-        <!-- <h2 class="text-xl font-black text-slate-800">User Management</h2> -->
         <h6 class="text-[22px] font-bold text-[#0F172A] tracking-tight">User Management</h6>
-
-
-        </div>
+      </div>
       <div class="flex gap-3">
         <button @click="isModalOpen = true; selectedUser = null" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 rounded-xl text-sm font-bold text-white hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition">
           <span>+</span> Add User
@@ -64,12 +61,19 @@
             </td>
 
             <td class="py-4 px-8 text-right">
-              <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition">
-                <button @click="openEditModal(user)" class="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-indigo-600 shadow-sm border border-transparent hover:border-slate-100 transition">
-                  📝
+              <div class="flex justify-end gap-5 transition-all duration-300">
+                <button 
+                  @click="openEditModal(user)" 
+                  class="text-[14px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                >
+                  Edit
                 </button>
-                <button class="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-rose-500 shadow-sm border border-transparent hover:border-slate-100 transition">
-                  🗑️
+
+                <button 
+                  @click="deleteUser(user.id)"
+                  class="text-[14px] font-bold text-rose-500 hover:text-rose-700 transition-colors"
+                >
+                  Delete
                 </button>
               </div>
             </td>
@@ -173,5 +177,28 @@ const filteredUsers = computed(() => {
     return false
   })
 })
+
+const deleteUser = async (id) => {
+
+  if (!confirm('Are you sure you want to delete this user?')) return;
+
+  try {
+    const token = authStore.token;
+    const response = await axios.delete(`http://127.0.0.1:8000/api/admin/user/delete/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (response.data.success || response.status === 200) {
+      alert('User deleted successfully!');
+      fetchUsers();
+    }
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    alert(error.response?.data?.message || 'Failed to delete user');
+  }
+};
 
 </script>

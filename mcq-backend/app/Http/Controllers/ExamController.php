@@ -43,7 +43,7 @@ class ExamController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'subject' => 'nullable|string',
             'total_marks' => 'required|integer|min:1',
             'pass_marks' => 'required|integer|lte:total_marks',
             'duration_minutes' => 'required|integer|min:1',

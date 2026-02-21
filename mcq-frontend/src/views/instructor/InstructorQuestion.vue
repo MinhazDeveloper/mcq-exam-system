@@ -1,5 +1,5 @@
 <template>
-  <div class="p-8 bg-[#F9FAFB] min-h-screen font-sans">
+  <div class="p-8 bg-[#F9FAFB] min-h-screen">
     <div class="flex items-center justify-between mb-8">
       <div>
         <h1 class="text-2xl font-bold text-[#111827]">Question Bank</h1>
@@ -19,31 +19,11 @@
     </div>
 
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div class="p-5 flex items-center justify-between gap-4 border-b border-gray-50">
-        <div class="relative w-72">
-          <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">🔍</span>
-          <input 
-            v-model="searchQuery"
-            type="text" 
-            placeholder="Search questions..." 
-            class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition"
-          />
-        </div>
-        <div class="flex gap-3">
-          <select class="border border-gray-200 rounded-xl px-4 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-500">
-            <option>All Subjects</option>
-          </select>
-          <select class="border border-gray-200 rounded-xl px-4 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-indigo-500">
-            <option>All Difficulties</option>
-          </select>
-        </div>
-      </div>
-
       <table class="w-full text-left">
-        <thead>
+        <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
           <tr class="text-[11px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-50">
             <th class="px-8 py-4">Question</th>
-            <th class="px-6 py-4">Subject</th>
+            <th class="px-6 py-4">Exam</th>
             <th class="px-6 py-4 text-center">Difficulty</th>
             <th class="px-6 py-4">Type</th>
             <th class="px-8 py-4 text-right">Actions</th>
@@ -51,10 +31,12 @@
         </thead>
         <tbody class="divide-y divide-gray-50">
           <tr v-for="q in filteredQuestions" :key="q.id" class="hover:bg-gray-50/50 transition">
-            <td class="px-8 py-5">
-              <div class="text-sm font-semibold text-gray-900 mb-1">{{ q.question_text }}</div>
-              <div class="text-[11px] text-indigo-500 font-medium">Used in {{ q.usageCount }} exams</div>
+            <td class="px-8 py-5 max-w-[300px]">
+              <div class="font-medium text-gray-900 truncate" :title="q.question_text">
+                {{ q.question_text }}
+              </div>
             </td>
+
             <td class="px-6 py-5 text-sm text-gray-600">{{ q.exam.title }}</td>
             <td class="px-6 py-5 text-center">
               <span :class="difficultyBadge(q.difficulty)">
@@ -62,69 +44,46 @@
               </span>
             </td>
             <td class="px-6 py-5 text-sm text-gray-600">{{ q.type }}</td>
-            <td class="px-8 py-5 text-right">
-              <div class="flex justify-end gap-2">
-                <button 
-                  @click="editQuestion(q)" 
-                  class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
-                >
-                  ✏️
-                </button>
-                <button 
-                  @click="deleteQuestion(q.id)" 
-                  class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
-                >
-                  🗑️
-                </button>
-              </div>
+           
+            <td class="px-6 py-4 text-right space-x-2">
+              <button @click="editQuestion(q)" class="text-indigo-600 hover:text-indigo-900 font-semibold">Edit</button>
+              <button @click="deleteQuestion(q.id)" class="text-red-600 hover:text-red-900 font-semibold">Delete</button>
             </td>
+
           </tr>
         </tbody>
       </table>
     </div>
 
     <Teleport to="body">
-      <div 
-        v-if="showModal" 
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
-        @click.self="showModal = false"
-      >
-        <div class="bg-white w-full max-w-lg rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-gray-100 overflow-hidden animate-in fade-in zoom-in duration-200">
-          
-          <div class="px-6 py-4 border-b border-gray-50 flex justify-between items-center">
+      <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click.self="showModal = false">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-gray-100 flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+
+          <!-- <div class="px-6 py-4 border-b border-gray-50 flex justify-between items-center">
             <h3 class="text-lg font-bold text-gray-800">
               {{ isEditing ? 'Edit Question' : 'Add New Question' }}
             </h3>
             <button @click="showModal = false" class="text-gray-400 hover:text-gray-600">✕</button>
+          </div> -->
+
+          <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-gray-800">{{ isEditing ? 'Edit Question' : 'Add New Question' }}</h3>
+            <button @click="showModal = false" class="text-gray-400 hover:text-gray-600 transition">✕</button>
           </div>
 
-          <div class="p-6 space-y-6">
+          <div class="p-6 space-y-6 overflow-y-auto custom-scrollbar">
             <div>
               <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Question Text</label>
-              <textarea 
-                v-model="form.question_text"
-                placeholder="Enter your question here..."
-                class="w-full p-3 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none text-sm bg-gray-50/30"
-              ></textarea>
+              <textarea v-model="form.question_text" placeholder="Enter your question here..." class="w-full p-3 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none text-sm bg-gray-50/30"></textarea>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Exam</label>
-                <select 
-                  v-model="form.exam_id"
-                  class="w-full p-2.5 border border-gray-200 rounded-xl text-gray-900 bg-white focus:ring-2 focus:ring-indigo-500 text-sm outline-none"
-                >
-                  <option disabled value="">Select Exam</option>
-                  <option 
-                    v-for="exam in exams" 
-                    :key="exam.id" 
-                    :value="exam.id"
-                  >
-                    {{ exam.title }}
-                  </option>
+                <select v-model="form.exam_id" class="w-full p-2.5 border border-gray-200 rounded-xl text-gray-900 bg-white focus:ring-2 focus:ring-indigo-500 text-sm outline-none">
+                  <option disabled value="null">Select Exam</option>
+                  <option v-for="exam in exams" :key="exam.id" :value="exam.id">{{ exam.title }}</option>
                 </select>
-
               </div>
               <div>
                 <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Difficulty</label>
@@ -139,22 +98,12 @@
             <div>
               <label class="block text-xs font-bold text-gray-700 uppercase mb-3">Answer Options (Select the correct one)</label>
               <div class="space-y-3">
-                <div v-for="(option, index) in form.options" :key="index" class="flex items-center gap-3">
-                  <input 
-                    type="radio" 
-                    :name="'correct_option'" 
-                    v-model="selectedCorrectIndex" 
-                    :value="index"
-                    class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
-                  />
-                  
-                  <input 
-                    v-model="option.text"
-                    :placeholder="'Option ' + (index + 1)"
-                    class="flex-1 p-2.5 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
-                  />
-                  
-                  <button v-if="form.options.length > 2" @click="removeOption(index)" class="text-gray-300 hover:text-red-500">🗑️</button>
+                <div v-for="(option, index) in form.options" :key="index" class="flex items-start gap-3 group">
+                  <div class="pt-3">
+                    <input type="radio" :name="'correct_option'" v-model="selectedCorrectIndex" :value="index" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 cursor-pointer" />
+                  </div>
+                  <input v-model="option.text" :placeholder="'Option ' + (index + 1)" class="flex-1 p-2.5 border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-indigo-500 outline-none text-sm" />
+                  <button v-if="form.options.length > 2" @click="removeOption(index)" class="pt-2 text-gray-300 hover:text-red-500 transition">🗑️</button>
                 </div>
               </div>
               <button @click="addOption" class="mt-4 text-indigo-600 text-sm font-semibold flex items-center gap-1 hover:underline">
@@ -164,15 +113,12 @@
           </div>
 
           <div class="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex justify-end items-center gap-4">
-            <button @click="showModal = false" class="text-sm font-semibold text-gray-500 hover:text-gray-700 transition">
-              Cancel
-            </button>
-            <button @click="saveQuestion" class="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-md transition">
-              Save Question
-            </button>
+            <button @click="showModal = false" class="text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancel</button>
+            <button @click="saveQuestion" class="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-md transition">Save Question</button>
           </div>
+          
         </div>
-      </div>
+      </div>  
     </Teleport>
   </div>
 </template>
@@ -328,16 +274,32 @@ const saveQuestion = async () => {
 
     const token = localStorage.getItem('token');
    
+    const payload = { ...form.value };
+
+    if (isEditing.value) {
+      payload._method = 'PUT';
+    }
+
     const url = isEditing.value 
       ? `http://127.0.0.1:8000/api/instructor/questions/${editingId.value}`
       : 'http://127.0.0.1:8000/api/instructor/questions';
 
     const method = isEditing.value ? 'put' : 'post';  
 
+    // const response = await axios({
+    //   method: method,
+    //   url: url,
+    //   data: form.value,
+    //   headers: {
+    //     'Authorization': `Bearer ${token}`,
+    //     'Accept': 'application/json'
+    //   }
+    // });
+
     const response = await axios({
-      method: method,
+      method: 'post',
       url: url,
-      data: form.value,
+      data: payload,
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'

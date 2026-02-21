@@ -8,26 +8,42 @@
       </div> -->
     </div>
 
-    <div class="flex items-center gap-6">
-      <div class="relative text-slate-400 hover:text-indigo-600 cursor-pointer">
-        <span class="text-xl">🔔</span>
-        <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full"></span>
+    
+
+    <div class="flex items-center gap-3 pl-6 border-l border-slate-200">
+      <div class="text-right">
+        <p class="text-sm font-bold text-slate-700 capitalize">
+          {{ authStore.user?.name || 'Loading...' }}
+        </p>
+        <p class="text-xs text-slate-400">Instructor</p>
       </div>
-      <div class="flex items-center gap-3 pl-6 border-l border-slate-200">
-        <div class="text-right">
-          <!-- <p class="text-sm font-bold">Thomas Anderson</p> -->
-          <p class="text-xs text-slate-400">Instructor</p>
-        </div>
-        <img src="https://ui-avatars.com/api/?name=Thomas+Anderson&background=random" class="w-10 h-10 rounded-full border-2 border-white shadow-sm">
-      </div>
+      
+      <img 
+        :src="userAvatar" 
+        :alt="authStore.user?.name"
+        class="w-10 h-10 rounded-full border-2 border-indigo-50 shadow-sm object-cover"
+      >
     </div>
+    
   </header>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
+const authStore = useAuthStore()
+
+const pageTitle = computed(() => {
+  return route.meta.title || 'Dashboard'
+})
+
+const userAvatar = computed(() => {
+  const name = authStore.user?.name || 'User'
+  return authStore.user?.profile_photo_url || `https://ui-avatars.com/api/?name=${name.replace(' ', '+')}&background=6366f1&color=fff`
+})
+
 
 </script>

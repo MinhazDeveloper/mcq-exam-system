@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Question;
 use App\Models\Submission;
+use App\Models\User;
 
 
 class Exam extends Model
@@ -12,7 +13,7 @@ class Exam extends Model
     protected $fillable = [
         'title', 'subject', 'total_marks',
         'pass_marks', 'duration_minutes',
-        'is_published','instructor_id'
+        'is_published','user_id'
         ];
 
     protected $casts = [
@@ -22,6 +23,10 @@ class Exam extends Model
         'duration_minutes' => 'integer',
     ];
     
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
+
     public function questions()
     {
         return $this->hasMany(Question::class);

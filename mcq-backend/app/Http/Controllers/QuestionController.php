@@ -9,8 +9,16 @@ use App\Http\Requests\StoreQuestionRequest;
 
 class QuestionController extends Controller
 {
-     public function index() {
-        $questions = Question::with(['options', 'exam'])->orderBy('created_at', 'desc')->get();
+    public function index() {
+        $instructorId = auth()->id(); 
+
+        $questions = Question::with(['options', 'exam'])
+            ->whereHas('exam', function($query) use ($instructorId) {
+                $query->where('user_id', $instructorId); // এখানে আপনার exams টেবিলের কলাম নাম অনুযায়ী user_id বা instructor_id দিন
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+            
         return response()->json(['success' => true, 'data' => $questions]);
     }
 
@@ -21,6 +29,7 @@ class QuestionController extends Controller
                 
                 $question = Question::create([
                     'exam_id' => $request->exam_id,
+                    'user_id' => auth()->id(),
                     'question_text' => $request->question_text,
                     'mark' => $request->mark ?? 1,
                     'explanation' => $request->explanation,

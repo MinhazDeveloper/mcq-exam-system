@@ -9,69 +9,39 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
         </svg>
       </div>
-      <span class="text-xl font-bold text-indigo-600 italic">ExamAdmin</span>
+      <span class="text-xl font-bold text-indigo-600 italic">Intellecta</span>
     </div>
 
     <!-- Menu -->
     <nav class="flex-1 px-3 space-y-0.5">
       <!-- dashboard -->
       <router-link
-        to="/admin/dashboard"
-        class="flex items-center gap-3 px-4 py-1 rounded-xl text-black hover:bg-slate-50 transition w-full"
+        to="/instructor/dashboard"
+        class="nav-link"
         active-class="active-link"
       >
-        <!-- Icon box -->
-        <span class="p-2 rounded-lg text-black">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <rect x="3" y="3" width="7" height="7" rx="1" />
-            <rect x="14" y="3" width="7" height="7" rx="1" />
-            <rect x="3" y="14" width="7" height="7" rx="1" />
-            <rect x="14" y="14" width="7" height="7" rx="1" />
-          </svg>
-        </span>
-        <!-- Text -->
-        <span class="text-xs font-medium text-slate-900 tracking-tight">
-          Dashboard
-        </span>
+        <div class="icon-container"><LayoutDashboard :size="16" /></div>
+        <span class="text-sm font-medium tracking-tight">Dashboard</span>
       </router-link>
 
-      <!-- exams -->       
+      <!-- exams -->    
       <router-link
         to="/instructor/exams"
-        class="flex items-center gap-3 px-4 py-1 rounded-xl text-black hover:bg-slate-50 transition w-full"
+        class="nav-link"
         active-class="active-link"
       >
-        <!-- Icon box -->
-        <span class="p-2 rounded-lg text-black">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <!-- User icon -->
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 20c0-4 4-6 8-6s8 2 8 6" />
-          </svg>
-        </span>
-        <!-- Text -->
-        <span class="text-xs font-medium text-slate-900 tracking-tight">
-          Exams
-        </span>
+        <div class="icon-container"><BookOpenCheck :size="16" /></div>
+        <span class="text-sm font-medium tracking-tight">Exams</span>
       </router-link>
-      
+  
       <!-- Question Bank -->
       <router-link
         to="/instructor/question"
-        class="flex items-center gap-3 px-4 py-1 rounded-xl text-black hover:bg-slate-50 transition w-full"
+        class="nav-link"
         active-class="active-link"
       >
-        <span class="p-2 rounded-lg text-black icon-container">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
-          </svg>
-        </span>
-        
-        <span class="text-xs font-medium text-slate-900 tracking-tight">
-          Question Bank
-        </span>
+        <div class="icon-container"><Database :size="16" /></div>
+        <span class="text-sm font-medium tracking-tight">Question Bank</span>
       </router-link>
     </nav>
 
@@ -187,6 +157,8 @@
 import Header from '@/components/instructor/InstructorHeader.vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { LayoutDashboard, Users, BookOpenCheck, Database } from 'lucide-vue-next';
+
 
 const router = useRouter()
 const auth = useAuthStore()

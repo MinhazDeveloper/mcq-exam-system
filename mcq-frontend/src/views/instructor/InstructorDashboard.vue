@@ -3,8 +3,10 @@
     <div class="bg-white p-6 rounded-[20px] border border-slate-100 shadow-sm flex flex-col justify-between h-[160px]">
       <div class="flex justify-between items-start">
         <div>
-          <p class="text-[15px] font-medium text-slate-500">Total Exams</p>
-          <h3 class="text-[32px] font-bold text-slate-900 leading-tight mt-1">24</h3>
+          <p class="text-[15px] font-medium text-slate-500">Total Exams66</p>
+          <h3 class="text-[32px] font-bold text-slate-900 leading-tight mt-1">
+            {{ stats.total_exams }}
+          </h3>
         </div>
         <div class="p-3 bg-slate-50 rounded-xl">
           <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -12,17 +14,15 @@
           </svg>
         </div>
       </div>
-      <div class="flex items-center gap-1.5 text-[14px] font-medium">
-        <span class="text-emerald-500">↗ +4</span>
-        <span class="text-slate-400 font-normal">vs last month</span>
-      </div>
     </div>
 
     <div class="bg-white p-6 rounded-[20px] border border-slate-100 shadow-sm flex flex-col justify-between h-[160px]">
       <div class="flex justify-between items-start">
         <div>
           <p class="text-[15px] font-medium text-slate-500">Active Students</p>
-          <h3 class="text-[32px] font-bold text-slate-900 leading-tight mt-1">1,240</h3>
+          <h3 class="text-[32px] font-bold text-slate-900 leading-tight mt-1">
+            {{ stats.active_students }}
+          </h3>
         </div>
         <div class="p-3 bg-indigo-50 rounded-xl">
           <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,45 +30,39 @@
           </svg>
         </div>
       </div>
-      <div class="flex items-center gap-1.5 text-[14px] font-medium">
-        <span class="text-emerald-500">↗ +12%</span>
-        <span class="text-slate-400 font-normal">vs last month</span>
-      </div>
     </div>
 
-    <div class="bg-white p-6 rounded-[20px] border border-slate-100 shadow-sm flex flex-col justify-between h-[160px]">
-      <div class="flex justify-between items-start">
-        <div>
-          <p class="text-[15px] font-medium text-slate-500">Completion Rate</p>
-          <h3 class="text-[32px] font-bold text-slate-900 leading-tight mt-1">86%</h3>
-        </div>
-        <div class="p-3 bg-emerald-50 rounded-xl">
-          <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-      </div>
-      <div class="flex items-center gap-1.5 text-[14px] font-medium">
-        <span class="text-rose-500">↘ -2%</span>
-        <span class="text-slate-400 font-normal">vs last month</span>
-      </div>
-    </div>
-
-    <div class="bg-white p-6 rounded-[20px] border border-slate-100 shadow-sm flex flex-col justify-between h-[160px]">
-      <div class="flex justify-between items-start">
-        <div>
-          <p class="text-[15px] font-medium text-slate-500">Revenue</p>
-          <h3 class="text-[32px] font-bold text-slate-900 leading-tight mt-1">$4,350</h3>
-        </div>
-        <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm">
-           <span class="text-xl font-bold text-slate-900">$</span>
-        </div>
-      </div>
-      <div class="flex items-center gap-1.5 text-[14px] font-medium">
-        <span class="text-emerald-500">↗ +18%</span>
-        <span class="text-slate-400 font-normal">vs last month</span>
-      </div>
-    </div>
   </div>
 </template>
 
+<script setup>
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+
+const stats = ref({
+  total_exams: 0,
+  active_students: 0
+});
+
+const loading = ref(true);
+
+const fetchDashboardStats = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await axios.get('http://127.0.0.1:8000/api/instructor/stats', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (response.data.success) {
+      stats.value = response.data.data;
+    }
+  } catch (error) {
+    console.error("Stats fetch error:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchDashboardStats();
+});
+</script>

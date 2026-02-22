@@ -28,10 +28,16 @@
             </thead>
 
             <tbody class="divide-y divide-gray-200">
+              <tr v-if="exams.length === 0">
+                <td colspan="5" class="px-6 py-10 text-center text-gray-500 italic">
+                  No exams found. Create your first exam!
+                </td>
+              </tr>
               <tr v-for="exam in exams" :key="exam.id">
                 <td class="px-6 py-4 font-medium text-gray-900">{{ exam.title }}</td>
-                <td class="px-6 py-4">{{ exam.questions }}</td>
-                <td class="px-6 py-4">
+                <td class="px-6 py-4 font-medium text-gray-900">{{exam.questions_count }}</td>
+
+                <td class="px-6 py-4 font-medium text-gray-900">
                   <span class="px-2 py-1 text-xs font-medium rounded-full" :class="statusClasses[exam.status]">
                     {{ exam.status }}
                   </span>
@@ -119,13 +125,18 @@ const fetchExams = async () => {
     const response = await axios.get('http://127.0.0.1:8000/api/instructor/exams', {
       headers: { 'Authorization': `Bearer ${token}` }
     });
-    const apiData = Array.isArray(response.data) ? response.data : response.data.data;
+    // const apiData = Array.isArray(response.data) ? response.data : response.data.data;
+    const apiData = response.data.data || response.data;
+
     exams.value = apiData.map(exam => ({
       ...exam,
+      questions_count: exam.questions_count ?? 0,
       status: exam.is_published ? 'Published' : 'Unpublished',
-      lastModified: exam.updated_at ? exam.updated_at.split('T')[0] : 'N/A'
+      lastModified: exam.updated_at ? new Date(exam.updated_at).toLocaleDateString('en-GB') : 'N/A'
+
     }));
-  } catch (error) { console.error(error); }
+  } catch (error) { 
+    console.error(error); }
 }
 
 const openModalForCreate = () => {
@@ -152,18 +163,29 @@ const openModalForEdit = (exam) => {
 const handleSubmit = async () => {
   try {
     const token = localStorage.getItem('token');
+
+    const payload = {
+      ...form,
+      is_published: form.is_published ? 1 : 0
+    };
+
     const url = isEditMode.value 
       ? `http://127.0.0.1:8000/api/instructor/exams/${currentExamId.value}`
       : 'http://127.0.0.1:8000/api/instructor/exams';
     
-    const method = isEditMode.value ? 'put' : 'post';
-
-    await axios[method](url, form, {
+    const response = await axios({
+      method: isEditMode.value ? 'put' : 'post',
+      url: url,
+      data: payload,
       headers: { 'Authorization': `Bearer ${token}` }
     });
-
-    await fetchExams();
-    isModalOpen.value = false;
+    
+    if (response.data.success) {
+      await fetchExams();
+      isModalOpen.value = false;
+      alert(isEditMode.value ? 'Exam updated successfully!' : 'Exam created successfully!');
+    }
+    
   } catch (error) { alert('Operation failed!'); }
 }
 

@@ -6,9 +6,9 @@
         <p class="text-sm text-gray-500 mt-1">Centralized repository for all your exam questions</p>
       </div>
       <div class="flex gap-3">
-        <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
+        <!-- <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
           <span>📄</span> Import CSV
-        </button>
+        </button> -->
         <button 
           @click="resetForm(); showModal = true" 
           class="flex items-center gap-2 px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-semibold hover:bg-[#4338CA] transition shadow-sm"
@@ -30,13 +30,18 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-50">
+          <tr v-if="loading">
+            <td colspan="5" class="px-8 py-10 text-center text-gray-400 italic">Loading questions...</td>
+          </tr>
+          <tr v-else-if="filteredQuestions.length === 0">
+            <td colspan="5" class="px-8 py-10 text-center text-gray-500 italic">No questions found.</td>
+          </tr>
           <tr v-for="q in filteredQuestions" :key="q.id" class="hover:bg-gray-50/50 transition">
             <td class="px-8 py-5 max-w-[300px]">
               <div class="font-medium text-gray-900 truncate" :title="q.question_text">
                 {{ q.question_text }}
               </div>
             </td>
-
             <td class="px-6 py-5 text-sm text-gray-600">{{ q.exam.title }}</td>
             <td class="px-6 py-5 text-center">
               <span :class="difficultyBadge(q.difficulty)">
@@ -44,12 +49,10 @@
               </span>
             </td>
             <td class="px-6 py-5 text-sm text-gray-600">{{ q.type }}</td>
-           
             <td class="px-6 py-4 text-right space-x-2">
               <button @click="editQuestion(q)" class="text-indigo-600 hover:text-indigo-900 font-semibold">Edit</button>
               <button @click="deleteQuestion(q.id)" class="text-red-600 hover:text-red-900 font-semibold">Delete</button>
             </td>
-
           </tr>
         </tbody>
       </table>
@@ -58,14 +61,6 @@
     <Teleport to="body">
       <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" @click.self="showModal = false">
         <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl border border-gray-100 flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
-
-          <!-- <div class="px-6 py-4 border-b border-gray-50 flex justify-between items-center">
-            <h3 class="text-lg font-bold text-gray-800">
-              {{ isEditing ? 'Edit Question' : 'Add New Question' }}
-            </h3>
-            <button @click="showModal = false" class="text-gray-400 hover:text-gray-600">✕</button>
-          </div> -->
-
           <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
             <h3 class="text-lg font-bold text-gray-800">{{ isEditing ? 'Edit Question' : 'Add New Question' }}</h3>
             <button @click="showModal = false" class="text-gray-400 hover:text-gray-600 transition">✕</button>
@@ -167,16 +162,20 @@ const fetchExams = async () => {
 }
 
 const fetchQuestions = async () => {
+  loading.value = true;
   try {
     const token = localStorage.getItem('token');
     const response = await axios.get('http://127.0.0.1:8000/api/instructor/questions', {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (response.data.success) {
-      questions.value = response.data.data;
+      questions.value = response.data.data.data; 
     }
+    
   } catch (error) {
     console.error("Error fetching questions:", error);
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -268,14 +267,22 @@ const saveQuestion = async () => {
       return;
     }
 
-    form.value.options.forEach((opt, index) => {
-      opt.is_correct = (index === selectedCorrectIndex.value);
-    });
+    const preparedOptions = form.value.options.map((opt, index) => ({
+      text: opt.text,
+      is_correct: index === selectedCorrectIndex.value
+    }));
 
     const token = localStorage.getItem('token');
    
-    const payload = { ...form.value };
-
+    const payload = {
+      question_text: form.value.question_text,
+      exam_id: form.value.exam_id,
+      difficulty: form.value.difficulty,
+      mark: form.value.mark,
+      explanation: form.value.explanation || '',
+      options: preparedOptions
+    };
+    
     if (isEditing.value) {
       payload._method = 'PUT';
     }
@@ -284,17 +291,6 @@ const saveQuestion = async () => {
       ? `http://127.0.0.1:8000/api/instructor/questions/${editingId.value}`
       : 'http://127.0.0.1:8000/api/instructor/questions';
 
-    const method = isEditing.value ? 'put' : 'post';  
-
-    // const response = await axios({
-    //   method: method,
-    //   url: url,
-    //   data: form.value,
-    //   headers: {
-    //     'Authorization': `Bearer ${token}`,
-    //     'Accept': 'application/json'
-    //   }
-    // });
 
     const response = await axios({
       method: 'post',

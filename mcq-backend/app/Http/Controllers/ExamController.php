@@ -16,13 +16,19 @@ class ExamController extends Controller
     
     public function index()
     {
-        $exams = Exam::orderBy('created_at', 'desc')->get();
-        
+        $instructorId = auth()->id(); 
+
+        $exams = Exam::where('user_id', $instructorId)
+                ->withCount('questions')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
         return response()->json([
             'success' => true,
             'data' => $exams
         ], 200);
     }
+    // get exam list for student
     public function getExamlist()
     {
         $exams = Exam::select('id', 'title','subject','duration_minutes','updated_at')
@@ -54,8 +60,10 @@ class ExamController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // ডাটাবেসে সেভ করা
-        $exam = Exam::create($request->all());
+        $data = $request->all();
+        $data['user_id'] = auth()->id();
+
+        $exam = Exam::create($data);
 
         return response()->json([
             'success' => true,

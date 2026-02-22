@@ -55,6 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //for instructors
     Route::middleware(['role:instructor'])->prefix('instructor')->group(function () {
         Route::get('/dashboard', [InstructorController::class, 'dashboard'])->name('instructor.dashboard');
+        Route::get('/stats', [InstructorController::class, 'getStats']);
         Route::apiResource('exams', ExamController::class);
         Route::apiResource('questions', QuestionController::class);
 

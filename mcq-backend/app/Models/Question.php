@@ -9,7 +9,7 @@ use App\Models\Option;
 
 class Question extends Model
 {
-    protected $fillable = ['exam_id', 'question_text', 'image', 'mark', 'explanation'];
+    protected $fillable = ['exam_id','user_id', 'question_text', 'image', 'mark', 'explanation'];
 
     protected $casts = [
         'mark' => 'integer',

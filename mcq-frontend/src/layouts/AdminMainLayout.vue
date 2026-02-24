@@ -44,6 +44,15 @@
         <span class="text-sm font-medium tracking-tight">Exams</span>
       </router-link>
 
+      <!-- exam-history -->
+      <router-link
+        to="/admin/exam-history"
+        class="nav-link"
+        active-class="active-link"
+      >
+        <div class="icon-container"><History :size="16" /></div>
+        <span class="text-sm font-medium tracking-tight">Exam History</span>
+      </router-link>
     </nav>
 
     <div class="mt-auto bg-white border-t border-slate-100 p-4">
@@ -87,7 +96,7 @@
 import Header from '@/components/admin/AdminHeader.vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { LayoutDashboard, Users, BookOpenCheck } from 'lucide-vue-next';
+import { LayoutDashboard, Users, BookOpenCheck, History } from 'lucide-vue-next';
 
 
 const router = useRouter()

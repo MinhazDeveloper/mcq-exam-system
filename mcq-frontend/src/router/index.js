@@ -6,6 +6,7 @@ import AdminMainLayout from '@/layouts/AdminMainLayout.vue';
 import AdminDashboard from '@/views/admin/AdminDashboard.vue'
 import Users from '@/views/admin/Users.vue'
 import AdminExam from '@/views/admin/AdminExam.vue'
+import AdminExamHistory from '@/views/admin/ExamHistory.vue'
 //instructor
 import InstructorMainLayout from '@/layouts/InstructorMainLayout.vue';
 import InstructorDashboard from '@/views/instructor/InstructorDashboard.vue'
@@ -60,6 +61,11 @@ const routes = [
         name: 'AdminExam',
         component: AdminExam
       },
+      {
+        path: 'exam-history', 
+        name: 'AdminExamHistory',
+        component: AdminExamHistory
+      },
       
     ]
   },
@@ -107,7 +113,7 @@ const routes = [
         path: 'exam/:id',
         name: 'StudentExam',
         component: StudentExam,
-        props: true // ✅ id props হিসেবে পাঠাবে
+        props: true
       },
       {
         path: 'exam-result/:id',

@@ -13,12 +13,6 @@
             <span class="text-[12px] font-bold text-gray-400 uppercase tracking-widest">
               Question {{ currentQuestionIndex + 1 }} of {{ totalQuestions }}
             </span>
-            <!-- <button 
-              @click="toggleMarkForReview"
-              :class="['text-sm font-medium flex items-center gap-2 transition-colors', markedForReview.has(currentQuestionIndex) ? 'text-yellow-600' : 'text-gray-500 hover:text-indigo-600']"
-            >
-              <span>🚩</span> {{ markedForReview.has(currentQuestionIndex) ? 'Marked' : 'Mark for Review' }}
-            </button> -->
           </div>
 
           <h2 class="text-xl font-bold text-gray-800 mb-8 leading-relaxed">
@@ -165,7 +159,7 @@ const fetchQuestions = async () => {
   try {
     loading.value = true;
     const token = localStorage.getItem('token');
-    const response = await axios.get(`http://127.0.0.1:8000/api/student/exams/${examId}/questions`, {
+    const response = await axios.get(`http://127.0.0.1:8000/api/student/exams/${examId}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     
@@ -177,7 +171,7 @@ const fetchQuestions = async () => {
     if (savedTime && parseInt(savedTime) > 0) {
       timeLeft.value = parseInt(savedTime);
     } else {
-      const examDuration = response.data.exam_duration || 30; 
+      const examDuration = response.data.duration_minutes || 30; 
       timeLeft.value = examDuration * 60;
       localStorage.setItem(TIME_KEY, timeLeft.value);
     }

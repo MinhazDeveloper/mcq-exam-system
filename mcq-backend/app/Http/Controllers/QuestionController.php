@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Question;
+use App\Models\Exam;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\StoreQuestionRequest;
 
@@ -103,12 +104,20 @@ class QuestionController extends Controller
     //get question for student
     public function getQuestionsForStudent($examId)
     {
-        $questions = Question::with(['options' => function($query) {
-            $query->select('id', 'question_id', 'option_text', 'is_correct'); 
-        }])
-        ->where('exam_id', $examId)
-        ->get();
+        $exam = Exam::select('id', 'duration_minutes')->find($examId);
 
-        return response()->json($questions);
+        if (!$exam) {
+            return response()->json(['message' => 'Exam not found'], 404);
+        }
+        $questions = Question::with(['options' => function($query) {
+            $query->select('id', 'question_id', 'option_text');
+            }])
+            ->where('exam_id', $examId)
+            ->get();
+        return response()->json([
+            'success' => true,
+            'duration_minutes' => $exam->duration_minutes,
+            'data' => $questions
+        ]);
     }
 }

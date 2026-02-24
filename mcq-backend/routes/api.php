@@ -2,11 +2,11 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController; 
 use App\Http\Controllers\InstructorController; 
 use App\Http\Controllers\StudentController; 
-
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\QuestionController; 
 
@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/user/update/{id}', [AdminController::class, 'updateUser']);
         Route::delete('/user/delete/{id}', [AdminController::class, 'destroy']);
         Route::get('/exams', [ExamController::class, 'getExamlist']);
+        Route::get('/exam-history', [AdminController::class, 'getAllSubmissions']);
       
     });
     //for instructors
@@ -66,8 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/exams', [ExamController::class, 'getExamList']);
         Route::get('/exam-result/{id}', [ExamController::class, 'getResult']);
         Route::get('/exam-history', [ExamController::class, 'getExamHistory']);
-
-        Route::get('/exams/{id}/questions', [QuestionController::class, 'getQuestionsForStudent']);
+        Route::get('/exams/{id}', [QuestionController::class, 'getQuestionsForStudent']);
         Route::post('exam/submit', [ExamController::class, 'ExamSubmit']);
 
     });

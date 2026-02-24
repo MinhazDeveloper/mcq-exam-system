@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Exam;
+use App\Models\Submission;
 use App\Models\ActivityLog;
 use Carbon\Carbon;
 use Illuminate\Validation\Rule;
@@ -127,8 +128,6 @@ class AdminController extends Controller
     {
         $totalStudents = User::where('role', 'student')->count();
         $totalExams = Exam::count();
-        // $totalAttempts = Attempt::count();
-        // $totalRevenue = Payment::where('status', 'success')->sum('amount');
 
        
         $registrations = User::where('role', 'student')
@@ -186,15 +185,41 @@ class AdminController extends Controller
             "success" => true,
             "data" => [
                 "total_students" => $totalStudents,
-                // "students_trend" => $studentsTrend,
                 "total_exams" => $totalExams,
                 "registration_trend" => $chartData,
                 "exams_today" => $examsToday,
                 'recent_activities' => $recentActivities
-                // "exams_trend" => 5, 
-                // "total_attempts" => $totalAttempts,
-                // "total_revenue" => $totalRevenue
             ]
         ], 200);
+    }
+    // get all submissions result for admin
+    public function getAllSubmissions()
+    {
+        // সব স্টুডেন্টের সাবমিশন লোড করা হচ্ছে (স্টুডেন্ট এবং এক্সাম ইনফোসহ)
+        $submissions = Submission::with(['user:id,name,email', 'exam:id,title,pass_marks,total_marks'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // পাস/ফেইল লজিক প্রসেস করা
+        $data = $submissions->map(function ($submission) {
+            $isPass = $submission->obtained_marks >= $submission->exam->pass_marks;
+            
+            return [
+                'id' => $submission->id,
+                'student_name' => $submission->user->name,
+                'student_email' => $submission->user->email,
+                'exam_title' => $submission->exam->title,
+                'total_marks' => $submission->exam->total_marks,
+                'pass_marks' => $submission->exam->pass_marks,
+                'obtained_marks' => $submission->obtained_marks,
+                'status' => $isPass ? 'Pass' : 'Fail',
+                'submitted_at' => $submission->created_at->format('d M Y, h:i A'),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
     }
 }

@@ -72,12 +72,21 @@
               <label class="block text-sm font-semibold text-slate-700 mb-1.5">Subject</label>
               <textarea v-model="form.subject" rows="3" class="w-full px-4 py-2.5 rounded-xl border border-slate-200"></textarea>
             </div>
+
             <div class="grid grid-cols-2 gap-4">
-              <input v-model="form.total_marks" type="number" placeholder="Total Marks" class="w-full px-4 py-2.5 rounded-xl border border-slate-200" required />
-              <input v-model="form.pass_marks" type="number" placeholder="Pass Marks" class="w-full px-4 py-2.5 rounded-xl border border-slate-200" required />
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Total Marks</label>
+                <input v-model="form.total_marks" type="number" class="w-full px-4 py-2.5 rounded-xl border border-slate-200" placeholder="100" required />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1.5">Pass Marks</label>
+                <input v-model="form.pass_marks" type="number" class="w-full px-4 py-2.5 rounded-xl border border-slate-200" placeholder="40" required />
+              </div>
             </div>
-            <input v-model="form.duration_minutes" type="number" placeholder="Duration (Min)" class="w-full px-4 py-2.5 rounded-xl border border-slate-200" required />
-            
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-1.5">Duration (Minutes)</label>
+              <input v-model="form.duration_minutes" type="number" class="w-full px-4 py-2.5 rounded-xl border border-slate-200" placeholder="e.g. 60" required />
+            </div>
             <div class="flex items-center gap-3">
               <input v-model="form.is_published" type="checkbox" id="is_published" class="w-5 h-5 text-indigo-600 rounded" />
               <label for="is_published" class="text-sm font-semibold text-slate-700">Publish Exam</label>

@@ -1,12 +1,11 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\QuestionController;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +18,7 @@ use App\Http\Controllers\QuestionController;
 //     ]);
 // });
 
-/// Public Routes
+// / Public Routes
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
@@ -29,7 +28,7 @@ Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallbac
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
-/// Protected Routes
+// / Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
@@ -47,17 +46,16 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/question', [QuestionController::class, 'store']);
         Route::put('/admin/question/{id}', [QuestionController::class, 'update']);
         Route::delete('/admin/question/{id}', [QuestionController::class, 'destroy']);
-        
+
         Route::get('/admin/stats', [QuestionController::class, 'dashboardStats']);
     });
     // for student and admin
     Route::get('/student/exams', [ExamController::class, 'getExamList']);
     Route::get('/student/exams/{id}/questions', [QuestionController::class, 'getQuestionsForStudent']);
-    
+
     Route::get('/exams', [ExamController::class, 'index']);
 
-
-    //start
+    // start
     // এডমিন রুটস (System Management)
     Route::middleware(['role:admin'])->prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'index']);
@@ -77,7 +75,3 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 });
-
-
-
-

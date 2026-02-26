@@ -3,9 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Submission;
-use App\Models\Question;
-use App\Models\Option;
 
 class Answer extends Model
 {
@@ -19,7 +16,7 @@ class Answer extends Model
     {
         return $this->belongsTo(Submission::class);
     }
-    
+
     public function question()
     {
         return $this->belongsTo(Question::class);
@@ -29,5 +26,4 @@ class Answer extends Model
     {
         return $this->belongsTo(Option::class, 'selected_option_id');
     }
-
 }

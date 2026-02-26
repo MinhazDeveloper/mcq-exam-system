@@ -6,24 +6,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Submission;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
-     
-
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
-    
     protected $fillable = [
         'name',
         'email',
@@ -31,7 +26,7 @@ class User extends Authenticatable
         'role',
         'provider',
         'provider_id',
-        'last_login_at'
+        'last_login_at',
     ];
 
     public function submissions()
@@ -45,7 +40,7 @@ class User extends Authenticatable
     // }
     public function hasRole($role)
     {
-        return $this->role === $role; 
+        return $this->role === $role;
     }
 
     /**

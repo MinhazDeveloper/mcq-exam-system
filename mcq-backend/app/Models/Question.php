@@ -3,19 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Exam;
-use App\Models\Option;
-
 
 class Question extends Model
 {
-    protected $fillable = ['exam_id','user_id', 'question_text', 'image', 'mark', 'explanation'];
+    protected $fillable = ['exam_id', 'user_id', 'question_text', 'image', 'mark', 'explanation'];
 
     protected $casts = [
         'mark' => 'integer',
     ];
 
-    public function exam(){
+    public function exam()
+    {
 
         return $this->belongsTo(Exam::class);
     }
@@ -24,5 +22,4 @@ class Question extends Model
     {
         return $this->hasMany(Option::class);
     }
-
 }

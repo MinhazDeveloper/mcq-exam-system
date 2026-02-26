@@ -14,12 +14,11 @@ class RoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-   
     public function handle(Request $request, Closure $next, string $role): Response
     {
-        if (!Auth::check() || !Auth::user()->hasRole($role)) {
+        if (! Auth::check() || ! Auth::user()->hasRole($role)) {
             return response()->json([
-                'message' => 'Unauthorized. You do not have the required role.'
+                'message' => 'Unauthorized. You do not have the required role.',
             ], 403);
         }
 

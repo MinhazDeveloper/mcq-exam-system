@@ -1,7 +1,7 @@
 <template>
   <header class="h-15 bg-white border-b border-slate-100 flex items-center justify-between px-10 fixed top-0 right-0 left-64 z-10">
     <div class="flex items-center gap-6">
-      <h1 class="text-2xl font-extrabold text-slate-800 mr-4">{{ title }}</h1>
+      <!-- <h1 class="text-2xl font-extrabold text-slate-800 mr-4">{{ pageTitle }}</h1> -->
     </div>
 
     <div class="flex items-center gap-3 pl-6 border-l border-slate-200">

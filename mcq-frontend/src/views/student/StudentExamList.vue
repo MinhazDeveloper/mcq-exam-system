@@ -1,7 +1,6 @@
 <template>
   <div class="p-8 bg-gray-50 min-h-screen ">
     <div class="mb-8">
-      <!-- <h1 class="text-2xl font-extrabold text-[#111827]">Enrolled Exams</h1> -->
       <h6 class="text-[22px] font-bold text-[#0F172A] tracking-tight">Enrolled Exams</h6>
       <p class="text-gray-500 mt-1">Manage and attend your scheduled examinations.</p>
     </div>
@@ -22,10 +21,6 @@
             {{ exam.subject || 'Subject' }}
           </span>
           
-          <!-- <span :class="statusBadgeClass(exam.status)">
-            <span v-if="exam.status === 'live'" class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse mr-1.5"></span>
-            {{ capitalize(exam.status) }}
-          </span> -->
         </div>
 
         <h2 class="text-xl font-bold text-gray-900 leading-tight mb-6">
@@ -70,8 +65,6 @@
         >
           Start Exam →
         </button>
-
-
       </div>
 
     </div>
@@ -118,7 +111,6 @@ const statusBadgeClass = (status) => {
   return base + "bg-green-50 text-green-500 border-green-100";
 };
 
-// const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 const capitalize = (str) => {
   if (!str) return '';
   return str.charAt(0).toUpperCase() + str.slice(1);

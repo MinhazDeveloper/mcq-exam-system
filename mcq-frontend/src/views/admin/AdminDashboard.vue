@@ -146,8 +146,7 @@ const activities = ref([]);
 const stats = ref([
   { title: 'Total Students', value: '0', trend: '0%', icon: Users, bgColor: 'bg-blue-500', key: 'total_students' },
   { title: 'Total Exams', value: '0', trend: '0%', icon: BookOpen, bgColor: 'bg-indigo-500', key: 'total_exams' },
-  // { title: 'Total Attempts', value: '0', trend: '0%', icon: GraduationCap, bgColor: 'bg-purple-500', key: 'total_attempts' },
-  // { title: 'Total Revenue', value: '$0', trend: '0%', icon: DollarSign, bgColor: 'bg-emerald-500', key: 'total_revenue' },
+  
 ]);
 
 const statusBadgeClass = (status) => {
@@ -180,13 +179,13 @@ const fetchDashboardStats = async () => {
     if (response.data.success) {
       const data = response.data.data;
       
-      // ২. এপিআই ডাটা অ্যাসাইন করা
+      // data assign from api response
       registrationData.value = data.registration_trend || [];
       todayExams.value = data.exams_today || [];
 
       activities.value = data.recent_activities || []; 
 
-      // Stats আপডেট
+      // Stats update
       if (stats.value[0]) {
         stats.value[0].value = data.total_students || 0;
         stats.value[0].trend = `+${data.students_trend || 0}%`;
@@ -196,8 +195,6 @@ const fetchDashboardStats = async () => {
         stats.value[1].trend = `+${data.exams_trend || 0}%`;
       }
       
-      //stats.value[2].value = data.total_attempts;
-      //stats.value[3].value = `$${data.total_revenue}`;
     }
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);

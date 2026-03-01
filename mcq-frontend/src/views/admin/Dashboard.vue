@@ -47,6 +47,4 @@
   </div>
 </template>
 
-<script setup>
-// future use: API call, pinia store, etc.
-</script>
+

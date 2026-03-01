@@ -26,17 +26,8 @@
                 </span>
               </div>
             </div>
-            
-
-            <!-- <div class="mt-3 ml-6">
-               <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded">
-                 Correct: {{ q.options.find(o => o.is_correct)?.option_text || 'Not Set' }}
-               </span>
-               <span class="ml-3 text-xs text-gray-400">Exam ID: {{ q.exam_id }}</span>
-            </div> -->
           </div>
 
-          <!-- 🔄 UPDATED: router-link বাদ দিয়ে modal edit button -->
           <div class="flex flex-col space-y-2 ml-4">
             <button
               @click="openEditModal(q)"
@@ -53,20 +44,6 @@
             </button>
           </div>
 
-          <!-- <div class="flex flex-col space-y-2 ml-4">
-            <router-link 
-              :to="'/admin/question/edit/' + q.id" 
-              class="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded border border-blue-200 text-center hover:bg-blue-600 hover:text-white transition"
-            >
-              Edit
-            </router-link>
-            <button 
-              @click="deleteQuestion(q.id)" 
-              class="text-sm bg-red-50 text-red-600 px-3 py-1 rounded border border-red-200 text-center hover:bg-red-600 hover:text-white transition"
-            >
-              Delete
-            </button>
-          </div> -->
         </div>
       </div>
     </div>
@@ -172,7 +149,6 @@ const fetchQuestions = async () => {
 }
 //Modal open function
 const openEditModal = (question) => {
-  //UPDATED: Deep copy (direct reference avoid করার জন্য)
   editForm.value = JSON.parse(JSON.stringify(question))
   isModalOpen.value = true
 }
@@ -189,7 +165,7 @@ const updateQuestion = async () => {
     )
     alert('Updated successfully!')
     closeModal()
-    fetchQuestions() // 🔄 UPDATED: লিস্ট রিফ্রেশ
+    fetchQuestions()
   } catch (error) {
     alert('Update failed!')
     console.error(error)
@@ -208,26 +184,6 @@ const deleteQuestion = async (id) => {
   }
 }
 
-// const fetchQuestions = async () => {
-//   try {
-//     const res = await apiClient.get('/admin/question/list');
-//     questions.value = res.data;
-//   } catch (error) {
-//     console.error("Fetch error", error);
-//   }
-// };
-
-// const deleteQuestion = async (id) => {
-//   if (confirm("Are you sure you want to delete this?")) {
-//     try {
-//       await apiClient.delete(`/admin/question/${id}`);
-//       questions.value = questions.value.filter(q => q.id !== id);
-//       alert("Deleted successfully");
-//     } catch (error) {
-//       alert("Delete failed");
-//     }
-//   }
-// };
-
 onMounted(fetchQuestions);
+
 </script>

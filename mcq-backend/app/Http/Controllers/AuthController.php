@@ -41,20 +41,30 @@ class AuthController extends Controller
 
         $user = User::where('email', $fields['email'])->first();
 
+        // If password wrong then save activity log
         if (! $user || ! Hash::check($fields['password'], $user->password)) {
+            ActivityLog::create([
+                'action' => 'Failed Login Attempt',
+                'ip_address' => $request->ip(),
+                'status' => 'Failed',
+                'user_name' => $fields['email']
+            ]);
             return response(['message' => 'Invalid Credentials'], 401);
         }
+
         // for preventing the user who already loged in google.
         if ($user->provider === 'google') {
             return response([
                 'message' => 'Please login using Google',
             ], 403);
         }
-        // last login time update and old token delete
+
+        $user->tokens()->delete();
+        $token = $user->createToken('myapptoken')->plainTextToken;
+
         $user->update([
             'last_login_at' => now(),
         ]);
-        $user->tokens()->delete();
 
         // Activity log save
         ActivityLog::create([
@@ -64,8 +74,6 @@ class AuthController extends Controller
             'ip_address' => $request->ip(),
             'status' => 'Success',
         ]);
-
-        $token = $user->createToken('myapptoken')->plainTextToken;
 
         return response([
             'user' => [
@@ -89,29 +97,27 @@ class AuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
 
-            $user = User::updateOrCreate([
-                'email' => $googleUser->getEmail(),
-            ], [
-                'name' => $googleUser->getName(),
-                'provider_id' => $googleUser->getId(),
-                'provider' => 'google',
-                // 'password' => null,
-                'password' => Hash::make(Str::random(24)),
-            ]);
+            // এখানে updateOrCreate ব্যবহার করলে পাসওয়ার্ড বারবার রিসেট হবে না যদি সেটি কন্ডিশনালি হ্যান্ডেল করেন
+            $user = User::where('email', $googleUser->getEmail())->first();
+
+            if (!$user) {
+                $user = User::create([
+                    'email' => $googleUser->getEmail(),
+                    'name' => $googleUser->getName(),
+                    'provider_id' => $googleUser->getId(),
+                    'provider' => 'google',
+                    'password' => Hash::make(Str::random(24)), // শুধু নতুন ইউজারের জন্য
+                ]);
+            }
 
             $user->tokens()->delete();
             $token = $user->createToken('myapptoken')->plainTextToken;
 
-            return response()->json([
-                'user' => $user,
-                'token' => $token,
-            ]);
-
+            return response()->json(['user' => $user, 'token' => $token]);
         } catch (\Exception $e) {
-            return response(['error' => 'Google authentication failed'], 401);
+            return response(['error' => 'Authentication failed'], 401);
         }
     }
-
     public function logout(Request $request)
     {
         if ($request->user()->currentAccessToken()) {

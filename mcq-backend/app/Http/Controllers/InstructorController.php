@@ -17,16 +17,23 @@ class InstructorController extends Controller
 
     public function getStats()
     {
-        $id = auth()->id();
+        $instructorId = auth()->id();
+
+        $examIds = Exam::where('user_id', $instructorId)->pluck('id');
+        $totalExams = $examIds->count();
+
+        $activeStudents = Submission::whereIn('exam_id', $examIds)
+            ->distinct('user_id')
+            ->count('user_id');
+
+        $totalSubmissions = Submission::whereIn('exam_id', $examIds)->count();
 
         return response()->json([
             'success' => true,
             'data' => [
-                'total_exams' => Exam::where('user_id', $id)->count(),
-                'active_students' => Submission::whereIn('exam_id', function ($query) use ($id) {
-                    $query->select('id')->from('exams')->where('user_id', $id);
-                })->distinct('user_id')->count(),
-
+                'total_exams' => $totalExams,
+                'active_students' => $activeStudents,
+                'total_submissions' => $totalSubmissions,
             ],
         ]);
     }

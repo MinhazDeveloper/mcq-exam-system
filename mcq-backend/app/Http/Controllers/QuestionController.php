@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreQuestionRequest;
 use App\Models\Exam;
 use App\Models\Question;
+use App\Models\Option;
 use Illuminate\Support\Facades\DB;
 
 class QuestionController extends Controller
@@ -15,7 +16,7 @@ class QuestionController extends Controller
 
         $questions = Question::with(['options', 'exam'])
             ->whereHas('exam', function ($query) use ($instructorId) {
-                $query->where('user_id', $instructorId); // এখানে আপনার exams টেবিলের কলাম নাম অনুযায়ী user_id বা instructor_id দিন
+                $query->where('user_id', $instructorId);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -37,12 +38,18 @@ class QuestionController extends Controller
                     'explanation' => $request->explanation,
                 ]);
 
-                foreach ($request->options as $opt) {
-                    $question->options()->create([
+                // Bulk Insert Options for performance
+                $optionsData = collect($request->options)->map(function ($opt) use ($question) {
+                    return [
+                        'question_id' => $question->id,
                         'option_text' => $opt['text'],
-                        'is_correct' => $opt['is_correct'],
-                    ]);
-                }
+                        'is_correct'  => $opt['is_correct'],
+                        'created_at'  => now(),
+                        'updated_at'  => now(),
+                    ];
+                })->toArray();
+
+                Option::insert($optionsData);
 
                 return response()->json([
                     'message' => 'Question and options created successfully!',
@@ -80,14 +87,20 @@ class QuestionController extends Controller
                     'explanation' => $request->explanation,
                 ]);
 
+                // Delete old options and Bulk Insert new ones
                 $question->options()->delete();
 
-                foreach ($request->options as $opt) {
-                    $question->options()->create([
+                $optionsData = collect($request->options)->map(function ($opt) use ($question) {
+                    return [
+                        'question_id' => $question->id,
                         'option_text' => $opt['text'],
-                        'is_correct' => $opt['is_correct'],
-                    ]);
-                }
+                        'is_correct'  => $opt['is_correct'],
+                        'created_at'  => now(),
+                        'updated_at'  => now(),
+                    ];
+                })->toArray();
+
+                Option::insert($optionsData);
 
                 return response()->json([
                     'success' => true,
@@ -112,11 +125,14 @@ class QuestionController extends Controller
         if (! $exam) {
             return response()->json(['message' => 'Exam not found'], 404);
         }
+
+        // Randomize questions for students to prevent cheating
         $questions = Question::with(['options' => function ($query) {
             $query->select('id', 'question_id', 'option_text');
         }])
-            ->where('exam_id', $examId)
-            ->get();
+        ->where('exam_id', $examId)
+        ->inRandomOrder()
+        ->get();
 
         return response()->json([
             'success' => true,

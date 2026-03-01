@@ -148,17 +148,27 @@ class ExamController extends Controller
         ]);
 
         $userId = auth()->id();
-        $totalQuestions = count($validated['answers']);
-        $correctCount = 0;
-        $wrongCount = 0;
+
+        if (Submission::where('user_id', $userId)->where('exam_id', $validated['exam_id'])->exists()) {
+            return response()->json(['success' => false, 'message' => 'You have already submitted this exam!'], 400);
+        }
 
         try {
-            return DB::transaction(function () use ($validated, $userId, $totalQuestions, &$correctCount, &$wrongCount) {
+            return DB::transaction(function () use ($validated, $userId) {
+
+                $questionIds = collect($validated['answers'])->pluck('question_id');
+                $correctOptionsMap = Option::whereIn('question_id', $questionIds)
+                    ->where('is_correct', true)
+                    ->pluck('id', 'question_id');
+
+                $correctCount = 0;
+                $wrongCount = 0;
+                $answersToInsert = [];
 
                 $submission = Submission::create([
                     'user_id' => $userId,
                     'exam_id' => $validated['exam_id'],
-                    'total_questions' => $totalQuestions,
+                    'total_questions' => count($validated['answers']),
                     'time_taken' => $validated['time_taken'] ?? 0,
                     'obtained_marks' => 0,
                     'correct_answers' => 0,
@@ -166,28 +176,24 @@ class ExamController extends Controller
                 ]);
 
                 foreach ($validated['answers'] as $ans) {
-                    $isCorrect = false;
-
+                    $correctOptionId = $correctOptionsMap[$ans['question_id']] ?? null;
+                    $isCorrect = ($ans['selected_option_id'] != null && $ans['selected_option_id'] == $correctOptionId);
+                    
                     if ($ans['selected_option_id']) {
-                        $correctOption = Option::where('question_id', $ans['question_id'])
-                            ->where('is_correct', true)
-                            ->first();
-
-                        if ($correctOption && $correctOption->id == $ans['selected_option_id']) {
-                            $isCorrect = true;
-                            $correctCount++;
-                        } else {
-                            $wrongCount++;
-                        }
+                        $isCorrect ? $correctCount++ : $wrongCount++;
                     }
 
-                    SubmissionAnswer::create([
+                    $answersToInsert[] = [
                         'submission_id' => $submission->id,
                         'question_id' => $ans['question_id'],
                         'option_id' => $ans['selected_option_id'],
                         'is_correct' => $isCorrect,
-                    ]);
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
                 }
+
+                SubmissionAnswer::insert($answersToInsert);
 
                 $submission->update([
                     'obtained_marks' => $correctCount,
@@ -197,12 +203,11 @@ class ExamController extends Controller
 
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Exam submitted!',
+                    'message' => 'Exam submitted successfully!',
                     'result' => [
                         'score' => $correctCount,
-                        'total' => $totalQuestions,
-                        'correct' => $correctCount,
-                        'wrong' => $wrongCount,
+                        'total' => count($validated['answers']),
+                        'submission_id' => $submission->id,
                     ],
                 ], 200);
             });
@@ -216,7 +221,6 @@ class ExamController extends Controller
     {
         $userId = auth()->id();
 
-        // ১. সাবমিশনটি খুঁজে বের করা (নিশ্চিত করা যে এটি এই ইউজারেরই সাবমিশন)
         $submission = Submission::with(['exam:id,title,total_marks'])
             ->where('id', $id)
             ->where('user_id', $userId)
@@ -226,7 +230,6 @@ class ExamController extends Controller
             return response()->json(['message' => 'Result not found'], 404);
         }
 
-        // ২. ডিটেইলস উত্তরগুলো লোড করা (প্রশ্ন এবং অপশনসহ)
         $details = SubmissionAnswer::with([
             'question:id,question_text',
             'question.options:id,question_id,option_text,is_correct',

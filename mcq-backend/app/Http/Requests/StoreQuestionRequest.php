@@ -26,7 +26,6 @@ class StoreQuestionRequest extends FormRequest
             'question_text' => 'required|string',
             'mark' => 'required|integer',
             'options' => 'required|array|min:2', // Minimum 2 options
-            // 'options.*.option_text' => 'required|string',
             'options.*.text' => 'required|string',
             'options.*.is_correct' => 'required|boolean',
 

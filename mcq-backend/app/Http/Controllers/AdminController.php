@@ -32,14 +32,14 @@ class AdminController extends Controller
         ]);
     }
 
-    // store user
+    /** Save users */
     public function storeUser(Request $request)
     {
         $fields = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
-            'role' => 'required|string',
+            'role' => ['required', Rule::in(['admin', 'student', 'instructor'])],
         ]);
 
         $user = User::create([
@@ -56,7 +56,7 @@ class AdminController extends Controller
         ], 201);
     }
 
-    // update user
+    /** update user */
     public function updateUser(Request $request, $id)
     {
 
@@ -68,8 +68,7 @@ class AdminController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'role' => 'required|string',
-            // 'role' => 'nullable|string',
+            'role' => ['required', Rule::in(['admin', 'student', 'instructor'])],
             'email' => [
                 'required',
                 'email',
@@ -95,10 +94,15 @@ class AdminController extends Controller
         ], 200);
     }
 
-    // delete user
+    /** delete user */ 
     public function destroy($id)
     {
         try {
+
+            if (auth()->id() == $id) {
+                return response()->json(['success' => false, 'message' => 'You cannot delete yourself!'], 403);
+            }
+
             $user = User::find($id);
 
             if (! $user) {
@@ -124,7 +128,7 @@ class AdminController extends Controller
         }
     }
 
-    // dashboard stats
+    /** dashboard stats */
     public function getStats()
     {
         $totalStudents = User::where('role', 'student')->count();
@@ -165,7 +169,7 @@ class AdminController extends Controller
 
             });
 
-        $recentActivities = ActivityLog::with('user')
+        $recentActivities = ActivityLog::with('user:id,name')
             ->latest()
             ->take(5)
             ->get()
@@ -191,7 +195,7 @@ class AdminController extends Controller
         ], 200);
     }
 
-    // get all submissions result for admin
+    /**  get all submissions result for admin */
     public function getAllSubmissions()
     {
         $submissions = Submission::with(['user:id,name,email', 'exam:id,title,pass_marks,total_marks'])
@@ -199,7 +203,9 @@ class AdminController extends Controller
             ->get();
 
         $data = $submissions->map(function ($submission) {
-            $isPass = $submission->obtained_marks >= $submission->exam->pass_marks;
+
+            $passMarks = $submission->exam->pass_marks ?? 0;
+            $isPass = $submission->obtained_marks >= $passMarks;
 
             return [
                 'id' => $submission->id,

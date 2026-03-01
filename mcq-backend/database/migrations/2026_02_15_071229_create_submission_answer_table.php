@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('submission_answers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('submission_id')->constrained()->onDelete('cascade');
-            $table->foreignId('question_id')->constrained();
-            $table->foreignId('option_id')->nullable(); 
+            $table->foreignId('question_id')->constrained()->onDelete('cascade');
+            $table->foreignId('option_id')->nullable()->constrained('options')->onDelete('cascade');
             $table->boolean('is_correct')->default(false);
             $table->timestamps();
         });
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('submission_answer');
+        Schema::dropIfExists('submission_answers');
     }
 };

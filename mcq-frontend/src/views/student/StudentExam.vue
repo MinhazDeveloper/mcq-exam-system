@@ -232,14 +232,6 @@ const submitExam = async (isAuto = false) => {
   }
 };
 
-// const toggleMarkForReview = () => {
-//   if (markedForReview.value.has(currentQuestionIndex.value)) {
-//     markedForReview.value.delete(currentQuestionIndex.value);
-//   } else {
-//     markedForReview.value.add(currentQuestionIndex.value);
-//   }
-// };
-
 const nextQuestion = () => {
   if (currentQuestionIndex.value < totalQuestions.value - 1) {
     currentQuestionIndex.value++;

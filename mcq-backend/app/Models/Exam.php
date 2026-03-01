@@ -3,18 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Question;
-use App\Models\Submission;
-use App\Models\User;
-
 
 class Exam extends Model
 {
     protected $fillable = [
         'title', 'subject', 'total_marks',
         'pass_marks', 'duration_minutes',
-        'is_published','user_id'
-        ];
+        'is_published', 'user_id',
+    ];
 
     protected $casts = [
         'is_published' => 'boolean',
@@ -22,8 +18,9 @@ class Exam extends Model
         'pass_marks' => 'integer',
         'duration_minutes' => 'integer',
     ];
-    
-    public function user() {
+
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
@@ -36,5 +33,4 @@ class Exam extends Model
     {
         return $this->hasMany(Submission::class);
     }
-
 }

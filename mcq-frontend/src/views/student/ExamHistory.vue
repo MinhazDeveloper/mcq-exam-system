@@ -91,13 +91,10 @@ import axios from 'axios';
 const history = ref([]);
 const loading = ref(true);
 
-// পাস মার্কস চেক করার লজিক (আপনি চাইলে ব্যাকএন্ড থেকেও সরাসরি স্ট্যাটাস পাঠাতে পারেন)
 const isPassed = (item) => {
-    // যদি প্রাপ্ত মার্কস পাস মার্কসের সমান বা বেশি হয়
     return item.obtained_marks >= (item.exam.pass_marks || 1);
 };
 
-// ডেট ফরম্যাট করার জন্য
 const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
@@ -122,9 +119,9 @@ onMounted(() => {
 });
 
 const calculatePercentage = (obtained, total) => {
-  if (!total || total === 0) return 0; // ০ দিয়ে ভাগ করা এড়াতে
+  if (!total || total === 0) return 0; 
   const percentage = (obtained / total) * 100;
-  return percentage > 100 ? 100 : percentage.toFixed(0); // সর্বোচ্চ ১০০% পর্যন্ত দেখাবে
+  return percentage > 100 ? 100 : percentage.toFixed(0); 
 };
 
 </script>

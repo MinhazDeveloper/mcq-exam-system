@@ -3,15 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
-use App\Models\Exam;
-use App\Models\Answer;
 
 class Submission extends Model
 {
     protected $fillable = [
-        'user_id', 'exam_id', 'total_questions', 'correct_answers', 
-        'wrong_answers', 'obtained_marks', 'time_taken', 'submitted_at'
+        'user_id', 'exam_id', 'total_questions', 'correct_answers',
+        'wrong_answers', 'obtained_marks', 'time_taken', 'submitted_at',
     ];
 
     protected $casts = [
@@ -30,10 +27,9 @@ class Submission extends Model
         return $this->belongsTo(Exam::class);
     }
 
-    //submission has many answer
+    // submission has many answer
     public function submissionAnswers()
     {
         return $this->hasMany(SubmissionAnswer::class);
     }
-    
 }

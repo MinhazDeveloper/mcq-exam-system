@@ -56,11 +56,6 @@
     </nav>
 
     <div class="mt-auto bg-white border-t border-slate-100 p-4">
-      <!-- <button @click="handleLogout" class="flex items-center gap-3 w-full text-left px-4 py-3 rounded-xl text-rose-600 hover:bg-rose-50 transition">
-        <span class="p-2 bg-rose-50 rounded-lg text-rose-600">⤴️</span>
-        <span class="text-xs font-medium">Logout</span>
-      </button> -->
-
       <button 
         @click="handleLogout" 
         class="flex items-center gap-3 px-4 py-2 w-full group transition-all duration-200"

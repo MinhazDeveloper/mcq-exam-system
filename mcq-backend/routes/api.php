@@ -1,15 +1,13 @@
 <?php
 
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ExamController;
+use App\Http\Controllers\InstructorController;
+use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\StudentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AdminController; 
-use App\Http\Controllers\InstructorController; 
-use App\Http\Controllers\StudentController; 
-use App\Http\Controllers\ExamController;
-use App\Http\Controllers\QuestionController; 
-
 
 /*
 |--------------------------------------------------------------------------
@@ -22,7 +20,7 @@ use App\Http\Controllers\QuestionController;
 //     ]);
 // });
 
-/// Public Routes
+// / Public Routes
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
@@ -32,7 +30,7 @@ Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallbac
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
-/// Protected Routes
+// / Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
@@ -51,9 +49,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/user/delete/{id}', [AdminController::class, 'destroy']);
         Route::get('/exams', [ExamController::class, 'getExamlist']);
         Route::get('/exam-history', [AdminController::class, 'getAllSubmissions']);
-      
+
     });
-    //for instructors
+    // for instructors
     Route::middleware(['role:instructor'])->prefix('instructor')->group(function () {
         Route::get('/dashboard', [InstructorController::class, 'dashboard'])->name('instructor.dashboard');
         Route::get('/stats', [InstructorController::class, 'getStats']);
@@ -61,7 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('questions', QuestionController::class);
 
     });
-    //for students
+    // for students
     Route::middleware(['role:student'])->prefix('student')->group(function () {
         Route::get('/dashboard', [StudentController::class, 'dashboard'])->name('student.dashboard');
         Route::get('/exams', [ExamController::class, 'getExamList']);
@@ -73,7 +71,3 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 });
-
-
-
-

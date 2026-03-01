@@ -2,28 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\User;
+use App\Models\ActivityLog;
 use App\Models\Exam;
 use App\Models\Submission;
-use App\Models\ActivityLog;
+use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Validation\Rule;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
-{   
+{
     public function userAll(Request $request)
-    {   
+    {
         $user_all = User::select([
-            'id', 
-            'name', 
-            'email', 
-            'role', 
-            'email_verified_at', 
-            'last_login_at', 
-            'created_at'
+            'id',
+            'name',
+            'email',
+            'role',
+            'email_verified_at',
+            'last_login_at',
+            'created_at',
         ])->orderBy('created_at', 'desc')->get();
 
         return response()->json([
@@ -32,45 +31,44 @@ class AdminController extends Controller
             'data' => $user_all,
         ]);
     }
-    //store user
+
+    /** Save users */
     public function storeUser(Request $request)
     {
-        // ১. ডাটা ভ্যালিডেশন
         $fields = $request->validate([
-            'name'     => 'required|string',
-            'email'    => 'required|email|unique:users,email',
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
-            'role'     => 'required|string',
+            'role' => ['required', Rule::in(['admin', 'student', 'instructor'])],
         ]);
 
-        // ২. ইউজার তৈরি
         $user = User::create([
-            'name'     => $fields['name'],
-            'email'    => $fields['email'],
+            'name' => $fields['name'],
+            'email' => $fields['email'],
             'password' => bcrypt($fields['password']),
-            'role'     => $fields['role'],
+            'role' => $fields['role'],
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'User created successfully',
-            'data'    => $user
+            'data' => $user,
         ], 201);
     }
-    //update user
+
+    /** update user */
     public function updateUser(Request $request, $id)
     {
-        
+
         $user = User::find($id);
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'User not found'], 404);
         }
 
         $request->validate([
-            'name'  => 'required|string|max:255',
-            'role'  => 'required|string',
-            // 'role' => 'nullable|string',
+            'name' => 'required|string|max:255',
+            'role' => ['required', Rule::in(['admin', 'student', 'instructor'])],
             'email' => [
                 'required',
                 'email',
@@ -79,9 +77,9 @@ class AdminController extends Controller
             'password' => 'nullable|min:6',
         ]);
 
-        $user->name  = $request->name;
+        $user->name = $request->name;
         $user->email = $request->email;
-        $user->role  = $request->role;
+        $user->role = $request->role;
 
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
@@ -92,19 +90,25 @@ class AdminController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User updated successfully',
-            'data'    => $user
+            'data' => $user,
         ], 200);
     }
-    // delete user
+
+    /** delete user */ 
     public function destroy($id)
     {
         try {
+
+            if (auth()->id() == $id) {
+                return response()->json(['success' => false, 'message' => 'You cannot delete yourself!'], 403);
+            }
+
             $user = User::find($id);
 
-            if (!$user) {
+            if (! $user) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'User not found'
+                    'message' => 'User not found',
                 ], 404);
             }
 
@@ -112,24 +116,24 @@ class AdminController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'User deleted successfully'
+                'message' => 'User deleted successfully',
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Something went wrong!',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
-    // dashboard stats
+
+    /** dashboard stats */
     public function getStats()
     {
         $totalStudents = User::where('role', 'student')->count();
         $totalExams = Exam::count();
 
-       
         $registrations = User::where('role', 'student')
             ->where('created_at', '>=', now()->subDays(6))
             ->selectRaw('DATE(created_at) as date, count(*) as count')
@@ -137,36 +141,35 @@ class AdminController extends Controller
             ->orderBy('date', 'ASC')
             ->get();
 
-        
         $chartData = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->format('Y-m-d');
             $dayName = now()->subDays($i)->format('D');
-            
+
             $found = $registrations->where('date', $date)->first();
-            
+
             $chartData[] = [
                 'day' => $dayName,
-                'count' => $found ? $found->count : 0
+                'count' => $found ? $found->count : 0,
             ];
-        }    
+        }
 
         $examsToday = Exam::whereDate('updated_at', today())
             ->get()
-            ->map(function($exam) {
+            ->map(function ($exam) {
                 return [
                     'id' => $exam->id,
                     'title' => $exam->title,
                     'duration_minutes' => $exam->duration_minutes,
                     'total_marks' => $exam->total_marks ?? 0,
-                    'time' => $exam->start_time 
-                                ? Carbon::parse($exam->start_time)->format('h:i A') 
+                    'time' => $exam->start_time
+                                ? Carbon::parse($exam->start_time)->format('h:i A')
                                 : null,
                 ];
 
-            });    
+            });
 
-        $recentActivities = ActivityLog::with('user')
+        $recentActivities = ActivityLog::with('user:id,name')
             ->latest()
             ->take(5)
             ->get()
@@ -180,30 +183,30 @@ class AdminController extends Controller
                 ];
             });
 
-        
         return response()->json([
-            "success" => true,
-            "data" => [
-                "total_students" => $totalStudents,
-                "total_exams" => $totalExams,
-                "registration_trend" => $chartData,
-                "exams_today" => $examsToday,
-                'recent_activities' => $recentActivities
-            ]
+            'success' => true,
+            'data' => [
+                'total_students' => $totalStudents,
+                'total_exams' => $totalExams,
+                'registration_trend' => $chartData,
+                'exams_today' => $examsToday,
+                'recent_activities' => $recentActivities,
+            ],
         ], 200);
     }
-    // get all submissions result for admin
+
+    /**  get all submissions result for admin */
     public function getAllSubmissions()
     {
-        // সব স্টুডেন্টের সাবমিশন লোড করা হচ্ছে (স্টুডেন্ট এবং এক্সাম ইনফোসহ)
         $submissions = Submission::with(['user:id,name,email', 'exam:id,title,pass_marks,total_marks'])
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // পাস/ফেইল লজিক প্রসেস করা
         $data = $submissions->map(function ($submission) {
-            $isPass = $submission->obtained_marks >= $submission->exam->pass_marks;
-            
+
+            $passMarks = $submission->exam->pass_marks ?? 0;
+            $isPass = $submission->obtained_marks >= $passMarks;
+
             return [
                 'id' => $submission->id,
                 'student_name' => $submission->user->name,
@@ -219,7 +222,7 @@ class AdminController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $data
+            'data' => $data,
         ]);
     }
 }

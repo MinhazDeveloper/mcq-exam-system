@@ -14,14 +14,10 @@ import InstructorExam from '@/views/instructor/InstructorExam.vue'
 import InstructorQuestion from '@/views/instructor/InstructorQuestion.vue'
 //student
 import StudentMainLayout from '@/layouts/StudentMainLayout.vue';
-// import StudentDashboard from '@/views/student/StudentDashboard.vue'
 import StudentExamList from '@/views/student/StudentExamList.vue'
 import ExamResult from '@/views/student/ExamResult.vue'
 import ExamHistory from '@/views/student/ExamHistory.vue'
 
-// import ExamPage from '@/views/admin/ExamPage.vue'
-import AdminQuestionForm from '@/views/admin/AdminQuestionForm.vue' 
-import QuestionList from '@/views/admin/QuestionList.vue'
 import StudentExam from '@/views/student/StudentExam.vue'
 
 import { useAuthStore } from '@/stores/auth';
@@ -99,11 +95,6 @@ const routes = [
     component: StudentMainLayout,
     meta: { requiresAuth: true, role: 'student' },
     children: [
-      // {
-      //   path: 'dashboard', 
-      //   name: 'StudentDashboard',
-      //   component: StudentDashboard
-      // },
       {
         path: 'dashboard', 
         name: 'StudentExams',

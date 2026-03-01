@@ -1,30 +1,8 @@
 <template>
   <div class="p-6 bg-white rounded shadow">
-    <!-- <h2 class="text-xl font-bold mb-4">Create New MCQ</h2> -->
-    <!-- ✅ Title dynamic -->
     <h2 class="text-xl font-bold mb-4">
       {{ isEdit ? 'Edit Question' : 'Create New MCQ' }}
     </h2>
-
-    <!-- ✅ Select Exam -->
-    <!-- <div class="mb-4">
-      <label class="block mb-1 font-medium">Select Exam</label>
-      <select
-        v-model="form.exam_id"
-        class="w-64 border p-2 rounded"
-        required
-      >
-        <option value="">-- Choose an Exam --</option>
-        <option
-          v-for="exam in exams"
-          :key="exam.id"
-          :value="exam.id"
-        >
-          {{ exam.title }}
-        </option>
-      </select>
-    </div> -->
-    
 
     <!-- ✅ Select Exam -->
     <div class="mb-4">
@@ -53,12 +31,7 @@
         placeholder="Enter question"
       />
     </div>
-    <!-- <div
-      v-for="(option, index) in form.options"
-      :key="index"
-      
-      class="flex items-center gap-2 mb-2"
-    > -->
+    
     <div
       v-for="(option, index) in form.options"
       :key="option.id ?? index"
@@ -116,9 +89,6 @@ const form = ref({
   question_text: '',
   mark: 1,
   options: [
-    // { option_text: '', is_correct: false },
-    // { option_text: '', is_correct: false }
-
     { id: null, option_text: '', is_correct: false },
     { id: null, option_text: '', is_correct: false }
 
@@ -154,7 +124,6 @@ onMounted(async () => {
 })
 
 const addOption = () => form.value.options.push({ id: null, option_text: '', is_correct: false });
-// const removeOption = (index) => form.value.options.splice(index, 1);
 const removeOption = (index) => {
   if (form.value.options.length > 2) {
     form.value.options.splice(index, 1);

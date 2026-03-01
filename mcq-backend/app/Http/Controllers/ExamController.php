@@ -2,43 +2,42 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Exam;
-use App\Models\Question;
 use App\Models\Option;
 use App\Models\Submission;
 use App\Models\SubmissionAnswer;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class ExamController extends Controller
 {
-    
     public function index()
     {
-        $instructorId = auth()->id(); 
+        $instructorId = auth()->id();
 
         $exams = Exam::where('user_id', $instructorId)
-                ->withCount('questions')
-                ->orderBy('created_at', 'desc')
-                ->get();
+            ->withCount('questions')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return response()->json([
             'success' => true,
-            'data' => $exams
+            'data' => $exams,
         ], 200);
     }
+
     // get exam list for student
     public function getExamlist()
     {
-        $exams = Exam::select('id', 'title','subject','duration_minutes','updated_at')
-                    ->orderBy('updated_at', 'desc')
-                    ->withCount('questions')
-                    ->get();
-        
+        $exams = Exam::select('id', 'title', 'subject', 'duration_minutes', 'updated_at')
+            ->orderBy('updated_at', 'desc')
+            ->withCount('questions')
+            ->get();
+
         return response()->json([
             'success' => true,
-            'data' => $exams
+            'data' => $exams,
         ], 200);
     }
 
@@ -53,7 +52,7 @@ class ExamController extends Controller
             'total_marks' => 'required|integer|min:1',
             'pass_marks' => 'required|integer|lte:total_marks',
             'duration_minutes' => 'required|integer|min:1',
-            'is_published' => 'boolean'
+            'is_published' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -68,7 +67,7 @@ class ExamController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Exam created successfully!',
-            'data' => $exam
+            'data' => $exam,
         ], 201);
     }
 
@@ -79,7 +78,7 @@ class ExamController extends Controller
     {
         $exam = Exam::find($id);
 
-        if (!$exam) {
+        if (! $exam) {
             return response()->json(['message' => 'Exam not found'], 404);
         }
 
@@ -93,7 +92,7 @@ class ExamController extends Controller
     {
         $exam = Exam::find($id);
 
-        if (!$exam) {
+        if (! $exam) {
             return response()->json(['message' => 'Exam not found'], 404);
         }
 
@@ -102,7 +101,7 @@ class ExamController extends Controller
             'total_marks' => 'integer|min:1',
             'pass_marks' => 'integer|lte:total_marks',
             'duration_minutes' => 'integer|min:1',
-            'is_published' => 'boolean'
+            'is_published' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -114,7 +113,7 @@ class ExamController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Exam updated successfully!',
-            'data' => $exam
+            'data' => $exam,
         ], 200);
     }
 
@@ -125,7 +124,7 @@ class ExamController extends Controller
     {
         $exam = Exam::find($id);
 
-        if (!$exam) {
+        if (! $exam) {
             return response()->json(['message' => 'Exam not found'], 404);
         }
 
@@ -133,9 +132,10 @@ class ExamController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Exam deleted successfully!'
+            'message' => 'Exam deleted successfully!',
         ], 200);
     }
+
     // student exam submit
     public function ExamSubmit(Request $request)
     {
@@ -148,17 +148,27 @@ class ExamController extends Controller
         ]);
 
         $userId = auth()->id();
-        $totalQuestions = count($validated['answers']);
-        $correctCount = 0;
-        $wrongCount = 0;
+
+        if (Submission::where('user_id', $userId)->where('exam_id', $validated['exam_id'])->exists()) {
+            return response()->json(['success' => false, 'message' => 'You have already submitted this exam!'], 400);
+        }
 
         try {
-            return DB::transaction(function () use ($validated, $userId, $totalQuestions, &$correctCount, &$wrongCount) {
-                
+            return DB::transaction(function () use ($validated, $userId) {
+
+                $questionIds = collect($validated['answers'])->pluck('question_id');
+                $correctOptionsMap = Option::whereIn('question_id', $questionIds)
+                    ->where('is_correct', true)
+                    ->pluck('id', 'question_id');
+
+                $correctCount = 0;
+                $wrongCount = 0;
+                $answersToInsert = [];
+
                 $submission = Submission::create([
                     'user_id' => $userId,
                     'exam_id' => $validated['exam_id'],
-                    'total_questions' => $totalQuestions,
+                    'total_questions' => count($validated['answers']),
                     'time_taken' => $validated['time_taken'] ?? 0,
                     'obtained_marks' => 0,
                     'correct_answers' => 0,
@@ -166,72 +176,66 @@ class ExamController extends Controller
                 ]);
 
                 foreach ($validated['answers'] as $ans) {
-                    $isCorrect = false;
-
+                    $correctOptionId = $correctOptionsMap[$ans['question_id']] ?? null;
+                    $isCorrect = ($ans['selected_option_id'] != null && $ans['selected_option_id'] == $correctOptionId);
+                    
                     if ($ans['selected_option_id']) {
-                        $correctOption = Option::where('question_id', $ans['question_id'])
-                                              ->where('is_correct', true)
-                                              ->first();
-
-                        if ($correctOption && $correctOption->id == $ans['selected_option_id']) {
-                            $isCorrect = true;
-                            $correctCount++;
-                        } else {
-                            $wrongCount++;
-                        }
+                        $isCorrect ? $correctCount++ : $wrongCount++;
                     }
 
-                    SubmissionAnswer::create([
+                    $answersToInsert[] = [
                         'submission_id' => $submission->id,
                         'question_id' => $ans['question_id'],
                         'option_id' => $ans['selected_option_id'],
                         'is_correct' => $isCorrect,
-                    ]);
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
                 }
 
+                SubmissionAnswer::insert($answersToInsert);
+
                 $submission->update([
-                    'obtained_marks' => $correctCount, 
+                    'obtained_marks' => $correctCount,
                     'correct_answers' => $correctCount,
                     'wrong_answers' => $wrongCount,
                 ]);
 
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Exam submitted!',
+                    'message' => 'Exam submitted successfully!',
                     'result' => [
                         'score' => $correctCount,
-                        'total' => $totalQuestions,
-                        'correct' => $correctCount,
-                        'wrong' => $wrongCount
-                    ]
+                        'total' => count($validated['answers']),
+                        'submission_id' => $submission->id,
+                    ],
                 ], 200);
             });
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to submit: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Failed to submit: '.$e->getMessage()], 500);
         }
     }
+
     // student exam result
     public function getResult($id)
     {
         $userId = auth()->id();
 
-        // ১. সাবমিশনটি খুঁজে বের করা (নিশ্চিত করা যে এটি এই ইউজারেরই সাবমিশন)
         $submission = Submission::with(['exam:id,title,total_marks'])
             ->where('id', $id)
             ->where('user_id', $userId)
             ->first();
 
-        if (!$submission) {
+        if (! $submission) {
             return response()->json(['message' => 'Result not found'], 404);
         }
 
-        // ২. ডিটেইলস উত্তরগুলো লোড করা (প্রশ্ন এবং অপশনসহ)
         $details = SubmissionAnswer::with([
-            'question:id,question_text', 
-            'question.options:id,question_id,option_text,is_correct'
+            'question:id,question_text',
+            'question.options:id,question_id,option_text,is_correct',
         ])
-        ->where('submission_id', $id)
-        ->get();
+            ->where('submission_id', $id)
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -243,22 +247,23 @@ class ExamController extends Controller
                 'obtained_marks' => $submission->obtained_marks,
                 'time_taken' => $submission->time_taken,
                 'submitted_at' => $submission->created_at->format('d M Y, h:i A'),
-                'answers' => $details->map(function($ans) {
+                'answers' => $details->map(function ($ans) {
                     return [
                         'question' => $ans->question->question_text,
                         'selected_option_id' => $ans->option_id,
                         'is_correct' => $ans->is_correct,
-                        'options' => $ans->question->options // সব অপশন পাঠাচ্ছি রিভিউ দেখানোর জন্য
+                        'options' => $ans->question->options, // সব অপশন পাঠাচ্ছি রিভিউ দেখানোর জন্য
                     ];
-                })
-            ]
+                }),
+            ],
         ], 200);
     }
+
     // Exam history for student
     public function getExamHistory()
     {
         $userId = auth()->id();
-        
+
         $history = Submission::with('exam:id,title,pass_marks,total_marks')
             ->where('user_id', $userId)
             ->orderBy('created_at', 'desc')
@@ -266,7 +271,7 @@ class ExamController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $history
+            'data' => $history,
         ]);
     }
 }

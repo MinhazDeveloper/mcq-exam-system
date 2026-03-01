@@ -2,28 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\ActivityLog;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
-
 
 class AuthController extends Controller
 {
-    public function register(Request $request) {
+    public function register(Request $request)
+    {
         $fields = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|confirmed'
+            'password' => 'required|string|confirmed',
         ]);
 
         $user = User::create([
             'name' => $fields['name'],
             'email' => $fields['email'],
             'password' => bcrypt($fields['password']),
-            'role' => 'student'
+            'role' => 'student',
         ]);
 
         $user->tokens()->delete();
@@ -32,39 +32,49 @@ class AuthController extends Controller
         return response(['user' => $user, 'token' => $token], 201);
     }
 
-    public function login(Request $request) {
+    public function login(Request $request)
+    {
         $fields = $request->validate([
             'email' => 'required|email',
-            'password' => 'required|string'
+            'password' => 'required|string',
         ]);
 
         $user = User::where('email', $fields['email'])->first();
 
-        if(!$user || !Hash::check($fields['password'], $user->password)) {
+        // If password wrong then save activity log
+        if (! $user || ! Hash::check($fields['password'], $user->password)) {
+            ActivityLog::create([
+                'action' => 'Failed Login Attempt',
+                'ip_address' => $request->ip(),
+                'status' => 'Failed',
+                'user_name' => $fields['email']
+            ]);
             return response(['message' => 'Invalid Credentials'], 401);
         }
-        //for preventing the user who already loged in google.
+
+        // for preventing the user who already loged in google.
         if ($user->provider === 'google') {
             return response([
-                'message' => 'Please login using Google'
+                'message' => 'Please login using Google',
             ], 403);
         }
-        // last login time update and old token delete
-        $user->update([
-            'last_login_at' => now()
-        ]);
+
         $user->tokens()->delete();
-        
-        // Activity log save
-        ActivityLog::create([
-            'user_id'    => $user->id,
-            'user_name'  => $user->name,
-            'action'     => 'User Login',
-            'ip_address' => $request->ip(),
-            'status'     => 'Success'
+        $token = $user->createToken('myapptoken')->plainTextToken;
+
+        $user->update([
+            'last_login_at' => now(),
         ]);
 
-        $token = $user->createToken('myapptoken')->plainTextToken;
+        // Activity log save
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'action' => 'User Login',
+            'ip_address' => $request->ip(),
+            'status' => 'Success',
+        ]);
+
         return response([
             'user' => [
                 'id' => $user->id,
@@ -72,48 +82,48 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'role' => $user->role,
             ],
-            'token' => $token
+            'token' => $token,
         ], 200);
     }
 
-    //Google Redirect
-    public function redirectToGoogle() {
+    // Google Redirect
+    public function redirectToGoogle()
+    {
         return Socialite::driver('google')->stateless()->redirect();
     }
 
-    public function handleGoogleCallback() {
+    public function handleGoogleCallback()
+    {
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
-            
-            $user = User::updateOrCreate([
-                'email' => $googleUser->getEmail(),
-            ], [
-                'name' => $googleUser->getName(),
-                'provider_id' => $googleUser->getId(),
-                'provider' => 'google',
-                // 'password' => null,
-                'password' => Hash::make(Str::random(24))
-            ]);
+
+            // এখানে updateOrCreate ব্যবহার করলে পাসওয়ার্ড বারবার রিসেট হবে না যদি সেটি কন্ডিশনালি হ্যান্ডেল করেন
+            $user = User::where('email', $googleUser->getEmail())->first();
+
+            if (!$user) {
+                $user = User::create([
+                    'email' => $googleUser->getEmail(),
+                    'name' => $googleUser->getName(),
+                    'provider_id' => $googleUser->getId(),
+                    'provider' => 'google',
+                    'password' => Hash::make(Str::random(24)), // শুধু নতুন ইউজারের জন্য
+                ]);
+            }
 
             $user->tokens()->delete();
             $token = $user->createToken('myapptoken')->plainTextToken;
 
-            // Vue Frontend redirect
-            // return redirect(env('FRONTEND_URL') . '/auth/callback?token=' . $token);
-            return response()->json([
-                'user' => $user,
-                'token' => $token,
-            ]);
-            
+            return response()->json(['user' => $user, 'token' => $token]);
         } catch (\Exception $e) {
-            return response(['error' => 'Google authentication failed'], 401);
+            return response(['error' => 'Authentication failed'], 401);
         }
     }
-
-    public function logout(Request $request) {
+    public function logout(Request $request)
+    {
         if ($request->user()->currentAccessToken()) {
             $request->user()->currentAccessToken()->delete();
         }
+
         return response()->json(['message' => 'Logged out']);
     }
 }

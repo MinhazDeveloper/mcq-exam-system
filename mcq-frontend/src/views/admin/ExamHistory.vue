@@ -78,19 +78,17 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from "@/services/api";
 
 const results = ref([]);
 const loading = ref(true);
 
-const fetchHistory = async () => {
+const fetchHistory = async () => { 
   try {
     loading.value = true;
-    const token = localStorage.getItem('token');
-    const response = await axios.get('http://127.0.0.1:8000/api/admin/exam-history', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
     
+    const response = await api.get('/admin/exam-history');
+
     results.value = response.data.data || [];
   } catch (error) {
     console.error("Error fetching history:", error);

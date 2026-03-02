@@ -95,9 +95,9 @@
 <script setup>
 
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import UserModal from './UserModal.vue'
+import api from "@/services/api";
 
 const authStore = useAuthStore()
 const activeTab = ref('students')
@@ -139,13 +139,9 @@ const fetchUsers = async () => {
   try {
     loading.value = true
     const token = authStore.token 
+    
+    const response = await api.get('/admin/user/all');
 
-    const response = await axios.get('http://127.0.0.1:8000/api/admin/user/all', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    })
     if (response.data && response.data.data) {
         users.value = response.data.data 
     } else {
@@ -183,13 +179,7 @@ const deleteUser = async (id) => {
   if (!confirm('Are you sure you want to delete this user?')) return;
 
   try {
-    const token = authStore.token;
-    const response = await axios.delete(`http://127.0.0.1:8000/api/admin/user/delete/${id}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
+    const response = await api.delete(`/admin/user/delete/${id}`);
 
     if (response.data.success || response.status === 200) {
       alert('User deleted successfully!');

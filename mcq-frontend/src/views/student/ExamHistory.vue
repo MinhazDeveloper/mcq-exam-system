@@ -24,37 +24,29 @@
           </thead>
           <tbody class="divide-y divide-gray-50">
             <tr v-for="item in history" :key="item.id" class="hover:bg-gray-50 transition-colors">
-              <td class="px-6 py-5 font-semibold text-gray-800">{{ item.exam.title }}</td>
-              <td class="px-6 py-5 text-gray-400 text-sm">{{ formatDate(item.created_at) }}</td>
-              <td class="px-6 py-5">
-                <div class="flex items-center gap-3">
-                    <span class="text-sm font-bold text-gray-700">
-                    {{ item.obtained_marks }}/{{ item.total_questions }}
-                    </span>
-
-                    <div class="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div 
-                        :class="item.obtained_marks >= (item.exam.pass_marks || 1) ? 'bg-green-500' : 'bg-red-500'" 
-                        class="h-full rounded-full transition-all duration-500" 
-                        :style="{ width: calculatePercentage(item.obtained_marks, item.total_questions) + '%' }"
-                    ></div>
-                    </div>
-                </div>
+              <td class="px-6 py-5 font-semibold text-gray-800">
+                {{ item.exam?.title || 'Unknown Exam' }}
               </td>
-              <!-- <td class="px-6 py-5">
+              <td class="px-6 py-5 text-gray-400 text-sm">
+                {{ formatDate(item.created_at) }}
+              </td>
+
+              <td class="px-6 py-5">
                 <div class="flex items-center gap-3">
                   <span class="text-sm font-bold text-gray-700">
                     {{ item.obtained_marks }}/{{ item.total_questions }}
                   </span>
+
                   <div class="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div 
                       :class="isPassed(item) ? 'bg-green-500' : 'bg-red-500'" 
-                      class="h-full rounded-full" 
-                      :style="{ width: (item.obtained_marks / item.total_questions) * 100 + '%' }"
+                      class="h-full rounded-full transition-all duration-500" 
+                      :style="{ width: calculatePercentage(item.obtained_marks, item.total_questions) + '%' }"
                     ></div>
                   </div>
                 </div>
-              </td> -->
+              </td>
+              
               <td class="px-6 py-5 text-center">
                 <span 
                   v-if="isPassed(item)"
@@ -86,27 +78,33 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from "@/services/api";
 
 const history = ref([]);
 const loading = ref(true);
 
 const isPassed = (item) => {
-    return item.obtained_marks >= (item.exam.pass_marks || 1);
+    const marks = Number(item.obtained_marks);
+    const passMarks = Number(item.exam?.pass_marks || 1);
+    return marks >= passMarks;
 };
 
 const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
 };
 
 const fetchHistory = async () => {
     try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://127.0.0.1:8000/api/student/exam-history', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const response = await api.get('/student/exam-history');
+
         history.value = response.data.data;
+
     } catch (error) {
         console.error("History fetch error:", error);
     } finally {

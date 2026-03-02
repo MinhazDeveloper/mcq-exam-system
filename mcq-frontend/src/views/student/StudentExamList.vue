@@ -73,7 +73,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from "@/services/api";
 
 const exams = ref([]);
 const loading = ref(true);
@@ -81,13 +81,7 @@ const loading = ref(true);
 const fetchExams = async () => {
   try {
     loading.value = true;
-    const token = localStorage.getItem('token');
-    const response = await axios.get('http://127.0.0.1:8000/api/student/exams', {
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
+    const response = await api.get('/student/exams');
 
     if (response.data.success) {
       exams.value = response.data.data;

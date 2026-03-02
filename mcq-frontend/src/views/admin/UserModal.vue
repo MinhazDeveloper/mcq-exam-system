@@ -47,29 +47,37 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import axios from 'axios'
-import { useAuthStore } from '@/stores/auth'
+import api from "@/services/api";
 
 const props = defineProps({
-  show: Boolean,
-  userData: Object
+  show: {
+    type: Boolean,
+    default: false
+  },
+  userData: {
+    type: Object,
+    default: null
+  }
 })
+
 const emit = defineEmits(['close', 'refresh'])
 
-const authStore = useAuthStore()
 const submitting = ref(false)
 const formData = ref({ name: '', email: '', role: 'student', password: '' })
 
-watch(() => props.userData, (newVal) => {
-  if (newVal) {
-    formData.value = { 
-      ...newVal, 
-      password: '' // password field empty for edit mode, unless admin wants to change it
+const resetForm = () => {
+  formData.value = { name: '', email: '', role: 'student', password: '' }
+}
+
+watch(() => props.show, (isVisible) => {
+  if (isVisible) {
+    if (props.userData) {
+      formData.value = { ...props.userData, password: '' }
+    } else {
+      resetForm()
     }
-  } else {
-    formData.value = { name: '', email: '', role: 'student', password: '' }
   }
-}, { immediate: true })
+})
 
 const handleSubmit = async () => {
   try {
@@ -77,31 +85,22 @@ const handleSubmit = async () => {
     const isEdit = !!props.userData 
     
     const url = isEdit 
-      ? `http://127.0.0.1:8000/api/admin/user/update/${props.userData.id}` 
-      : 'http://127.0.0.1:8000/api/admin/user/store'
-    
+      ? `/admin/user/update/${props.userData.id}` 
+      : '/admin/user/store';
+
     // Payload
     const payload = { ...formData.value }  
 
     // Edit mode: remove empty password
     if (isEdit && !payload.password) delete payload.password
-    
-    const response = isEdit
-      ? await axios.put(url, payload, {
-          headers: { 
-            'Authorization': `Bearer ${authStore.token}`,
-            'Accept': 'application/json'
-          }
-        })
-      : await axios.post(url, payload, {
-          headers: { 
-            'Authorization': `Bearer ${authStore.token}`,
-            'Accept': 'application/json'
-          }
-        })
 
+    const response = isEdit 
+      ? await api.put(url, payload) 
+      : await api.post(url, payload);
+
+   
     // Success
-    if (response.data.success || response.status === 200) {
+    if (response.data.success || response.status === 200 || response.status === 201) {
       alert(isEdit ? 'User updated!' : 'New user added!')
       emit('refresh')
       emit('close')

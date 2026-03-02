@@ -135,7 +135,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+// import axios from 'axios';
+import api from "@/services/api";
 import { Users, BookOpen, } from 'lucide-vue-next';
 
 const loading = ref(true);
@@ -169,13 +170,8 @@ const fetchDashboardStats = async () => {
       return;
     }
 
-    const response = await axios.get('http://127.0.0.1:8000/api/admin/dashboard-stats', {
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
-
+    const response = await api.get('/admin/dashboard-stats');
+    
     if (response.data.success) {
       const data = response.data.data;
       

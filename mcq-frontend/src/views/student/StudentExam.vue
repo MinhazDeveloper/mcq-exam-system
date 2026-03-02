@@ -110,7 +110,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
+import api from "@/services/api";
 
 const route = useRoute();
 const router = useRouter();
@@ -131,6 +131,7 @@ const currentQuestionIndex = ref(0);
 const selectedOptions = ref([]);
 const markedForReview = ref(new Set());
 const loading = ref(true);
+const submitting = ref(false);
 
 const formattedTime = computed(() => {
   const minutes = Math.floor(timeLeft.value / 60);
@@ -158,10 +159,7 @@ const autoSubmitExam = () => {
 const fetchQuestions = async () => {
   try {
     loading.value = true;
-    const token = localStorage.getItem('token');
-    const response = await axios.get(`http://127.0.0.1:8000/api/student/exams/${examId}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const response = await api.get(`/student/exams/${examId}`);
     
     questions.value = response.data.data || response.data;
     totalQuestions.value = questions.value.length;
@@ -204,31 +202,35 @@ const clearExamStorage = () => {
 };
 
 const submitExam = async (isAuto = false) => {
+  if (submitting.value) return;
   if (!isAuto && !confirm("Are you sure you want to submit the exam?")) return;
   
+  submitting.value = true;
   window.onbeforeunload = null;
   if (timerInterval) clearInterval(timerInterval);
 
   const payload = {
     exam_id: examId,
-    answers: questions.value.map((q, index) => ({
-      question_id: q.id,
-      selected_option_id: selectedOptions.value[index] !== null ? q.options[selectedOptions.value[index]].id : null
-    }))
+    answers: questions.value.map((q, index) => {
+      const selectedIdx = selectedOptions.value[index];
+      return {
+        question_id: q.id,
+        selected_option_id: (selectedIdx !== null && q.options && q.options[selectedIdx]) 
+          ? q.options[selectedIdx].id 
+          : null
+      };
+    })
   };
 
   try {
-    const token = localStorage.getItem('token');
-    await axios.post('http://127.0.0.1:8000/api/student/exam/submit', payload, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    
-    clearExamStorage(); // Clear storage on success
+    const response = await api.post('/student/exam/submit', payload);
+    clearExamStorage();
     alert(isAuto ? 'Time Expired! Submitted automatically.' : 'Exam Submitted Successfully!');
     router.push('/student/dashboard');
   } catch (error) {
     console.error("Submit Error:", error);
-    alert('Error submitting exam.');
+    alert('Error submitting exam. Please try again.');
+    submitting.value = false;
   }
 };
 

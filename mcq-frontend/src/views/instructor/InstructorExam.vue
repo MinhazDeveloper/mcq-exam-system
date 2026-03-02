@@ -107,7 +107,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios';
+import api from "@/services/api";
 
 const isModalOpen = ref(false)
 const isEditMode = ref(false)
@@ -130,11 +130,8 @@ const form = reactive({
 
 const fetchExams = async () => {
   try {
-    const token = localStorage.getItem('token');
-    const response = await axios.get('http://127.0.0.1:8000/api/instructor/exams', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    // const apiData = Array.isArray(response.data) ? response.data : response.data.data;
+    
+    const response = await api.get('/instructor/exams');
     const apiData = response.data.data || response.data;
 
     exams.value = apiData.map(exam => ({
@@ -170,25 +167,27 @@ const openModalForEdit = (exam) => {
 }
 
 const handleSubmit = async () => {
-  try {
-    const token = localStorage.getItem('token');
 
+  if (Number(form.pass_marks) > Number(form.total_marks)) {
+    alert('Pass marks cannot be greater than total marks!');
+    return;
+  }
+
+  try {
     const payload = {
       ...form,
       is_published: form.is_published ? 1 : 0
     };
 
     const url = isEditMode.value 
-      ? `http://127.0.0.1:8000/api/instructor/exams/${currentExamId.value}`
-      : 'http://127.0.0.1:8000/api/instructor/exams';
-    
-    const response = await axios({
-      method: isEditMode.value ? 'put' : 'post',
-      url: url,
-      data: payload,
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    
+      ? `/instructor/exams/${currentExamId.value}` 
+      : '/instructor/exams';
+
+    // এডিট হলে PUT, নতুন হলে POST
+    const response = isEditMode.value 
+      ? await api.put(url, payload) 
+      : await api.post(url, payload);
+   
     if (response.data.success) {
       await fetchExams();
       isModalOpen.value = false;
@@ -201,10 +200,8 @@ const handleSubmit = async () => {
 const handleDelete = async (id) => {
   if (!confirm('Are you sure you want to delete this exam?')) return;
   try {
-    const token = localStorage.getItem('token');
-    await axios.delete(`http://127.0.0.1:8000/api/instructor/exams/${id}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    await api.delete(`/instructor/exams/${id}`);
+    alert('Exam deleted successfully!');
     await fetchExams();
   } catch (error) { alert('Delete failed!'); }
 }

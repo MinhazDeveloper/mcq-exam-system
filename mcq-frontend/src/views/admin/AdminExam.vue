@@ -3,6 +3,7 @@
     <div class="flex justify-between items-center mb-8">
       <h2 class="text-2xl font-bold text-slate-900">Exam Details</h2>
     </div>
+    <div v-if="loading" class="text-center py-8">Loading exams...</div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
        <div v-for="exam in exams" :key="exam.id" class="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-md transition-shadow relative group">
@@ -23,7 +24,7 @@
             <span class="font-medium">{{ exam.duration_minutes }} minutes</span>
           </div>
           <div class="flex items-center gap-3 text-slate-400 text-sm">
-            <span>📅</span>
+            <span>📝</span>
             <span class="font-medium">{{ exam.questions_count }}</span>
           </div>
           <div class="flex items-center gap-3 text-slate-400 text-sm">
@@ -40,7 +41,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
+import api from "@/services/api";
 import { useAuthStore } from '@/stores/auth';
 
 const authStore = useAuthStore();
@@ -53,12 +54,7 @@ const fetchExams = async () => {
     loading.value = true;
     const token = authStore.token;
 
-    const response = await axios.get('http://127.0.0.1:8000/api/admin/exams', {
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
+    const response = await api.get('/admin/exams');
 
     if (response.data.success) {
       exams.value = response.data.data;

@@ -111,7 +111,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
+import api from "@/services/api";
 
 const route = useRoute();
 const router = useRouter();
@@ -125,15 +125,8 @@ const showReview = ref(false);
 const fetchResult = async () => {
   try {
     loading.value = true;
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/login');
-      return;
-    }
-
-    const response = await axios.get(`http://127.0.0.1:8000/api/student/exam-result/${submissionId}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    
+    const response = await api.get(`/student/exam-result/${submissionId}`);
 
     if (response.data.success) {
       result.value = response.data.data;

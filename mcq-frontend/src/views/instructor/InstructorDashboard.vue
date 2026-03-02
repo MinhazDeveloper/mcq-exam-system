@@ -3,7 +3,7 @@
     <div class="bg-white p-6 rounded-[20px] border border-slate-100 shadow-sm flex flex-col justify-between h-[160px]">
       <div class="flex justify-between items-start">
         <div>
-          <p class="text-[15px] font-medium text-slate-500">Total Exams66</p>
+          <p class="text-[15px] font-medium text-slate-500">Total Exams</p>
           <h3 class="text-[32px] font-bold text-slate-900 leading-tight mt-1">
             {{ stats.total_exams }}
           </h3>
@@ -37,7 +37,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from "@/services/api";
 
 const stats = ref({
   total_exams: 0,
@@ -48,10 +48,9 @@ const loading = ref(true);
 
 const fetchDashboardStats = async () => {
   try {
-    const token = localStorage.getItem('token');
-    const response = await axios.get('http://127.0.0.1:8000/api/instructor/stats', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    
+    const response = await api.get('/instructor/stats');
+
     if (response.data.success) {
       stats.value = response.data.data;
     }

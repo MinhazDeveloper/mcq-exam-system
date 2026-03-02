@@ -6,9 +6,6 @@
         <p class="text-sm text-gray-500 mt-1">Centralized repository for all your exam questions</p>
       </div>
       <div class="flex gap-3">
-        <!-- <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition">
-          <span>📄</span> Import CSV
-        </button> -->
         <button 
           @click="resetForm(); showModal = true" 
           class="flex items-center gap-2 px-4 py-2 bg-[#4F46E5] text-white rounded-lg text-sm font-semibold hover:bg-[#4338CA] transition shadow-sm"
@@ -120,7 +117,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
+import api from "@/services/api";
 
 const exams = ref([]);
 const questions = ref([]);
@@ -145,14 +142,8 @@ const form = ref({
 });
 const fetchExams = async () => {
   try {
-    const token = localStorage.getItem('token'); 
 
-    const response = await axios.get('http://127.0.0.1:8000/api/instructor/exams', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
+    const response = await api.get('/instructor/exams');
 
     if (response.data?.success) exams.value = response.data.data;
 
@@ -164,10 +155,8 @@ const fetchExams = async () => {
 const fetchQuestions = async () => {
   loading.value = true;
   try {
-    const token = localStorage.getItem('token');
-    const response = await axios.get('http://127.0.0.1:8000/api/instructor/questions', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const response = await api.get('/instructor/questions');
+
     if (response.data.success) {
       questions.value = response.data.data.data; 
     }
@@ -211,12 +200,10 @@ const deleteQuestion = async (id) => {
   if (!confirm("Are you sure you want to delete this question?")) return;
 
   try {
-    const token = localStorage.getItem('token');
-    await axios.delete(`http://127.0.0.1:8000/api/instructor/questions/${id}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    await api.delete(`/instructor/questions/${id}`);
     alert("Question deleted successfully.");
     await fetchQuestions();
+
   } catch (error) {
     console.error("Delete Error:", error);
   }
@@ -288,19 +275,12 @@ const saveQuestion = async () => {
     }
 
     const url = isEditing.value 
-      ? `http://127.0.0.1:8000/api/instructor/questions/${editingId.value}`
-      : 'http://127.0.0.1:8000/api/instructor/questions';
+      ? `/instructor/questions/${editingId.value}`
+      : '/instructor/questions';
 
-
-    const response = await axios({
-      method: 'post',
-      url: url,
-      data: payload,
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      }
-    });
+    const response = isEditing.value 
+      ? await api.put(url, payload) 
+      : await api.post(url, payload);
 
     if (response.status === 201 || response.status === 200) {
       alert(isEditing.value ? 'Updated successfully!' : 'Saved successfully!');

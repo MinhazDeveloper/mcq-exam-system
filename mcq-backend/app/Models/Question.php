@@ -10,6 +10,7 @@ class Question extends Model
 
     protected $casts = [
         'mark' => 'integer',
+        'options' => 'array',
     ];
 
     public function exam()

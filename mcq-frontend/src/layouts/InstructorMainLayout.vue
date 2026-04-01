@@ -43,6 +43,16 @@
           <div class="icon-container"><Database :size="16" /></div>
           <span class="text-sm font-medium tracking-tight">Question Bank</span>
         </router-link>
+
+        <!-- AI Question Generator -->
+        <router-link
+          to="/instructor/question-AI"
+          class="nav-link"
+          active-class="active-link"
+        >
+          <div class="icon-container"><Sparkles :size="16" /></div>
+          <span class="text-sm font-medium tracking-tight">AI Question Generator</span>
+        </router-link>
       </nav>
 
       <div class="mt-auto bg-white border-t border-slate-100 p-4">
@@ -71,6 +81,8 @@
           
         </router-view> 
       </main>
+
+      <Footer />
       
     </div>    
   </div>
@@ -79,9 +91,10 @@
 
 <script setup>
 import Header from '@/components/instructor/InstructorHeader.vue'
+import Footer from '@/components/instructor/InstructorFooter.vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { LayoutDashboard, Users, BookOpenCheck, Database } from 'lucide-vue-next';
+import { LayoutDashboard, Users, BookOpenCheck, Database, Sparkles } from 'lucide-vue-next';
 
 
 const router = useRouter()

@@ -22,7 +22,6 @@
             <th class="px-8 py-4">Question</th>
             <th class="px-6 py-4">Exam</th>
             <th class="px-6 py-4 text-center">Difficulty</th>
-            <th class="px-6 py-4">Type</th>
             <th class="px-8 py-4 text-right">Actions</th>
           </tr>
         </thead>
@@ -45,7 +44,6 @@
                 {{ q.difficulty }}
               </span>
             </td>
-            <td class="px-6 py-5 text-sm text-gray-600">{{ q.type }}</td>
             <td class="px-6 py-4 text-right space-x-2">
               <button @click="editQuestion(q)" class="text-indigo-600 hover:text-indigo-900 font-semibold">Edit</button>
               <button @click="deleteQuestion(q.id)" class="text-red-600 hover:text-red-900 font-semibold">Delete</button>
@@ -53,6 +51,38 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="mt-6 flex items-center justify-between bg-white px-8 py-4 rounded-2xl border border-gray-100 shadow-sm">
+      <div class="text-sm text-gray-500">
+        Showing <span class="font-semibold text-gray-900">{{ questions.length }}</span> 
+        of <span class="font-semibold text-gray-900">{{ pagination.total }}</span> questions
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button 
+          @click="handlePageChange(pagination.current_page - 1)"
+          :disabled="pagination.current_page === 1 || loading"
+          class="flex items-center gap-1 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        >
+          <span>←</span> Previous
+        </button>
+
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-md text-sm font-bold border border-indigo-100">
+            {{ pagination.current_page }}
+          </span>
+          <span class="text-gray-400 text-sm">of {{ pagination.last_page }}</span>
+        </div>
+
+        <button 
+          @click="handlePageChange(pagination.current_page + 1)"
+          :disabled="pagination.current_page === pagination.last_page || loading"
+          class="flex items-center gap-1 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        >
+          Next <span>→</span>
+        </button>
+      </div>
     </div>
 
     <Teleport to="body">
@@ -106,7 +136,13 @@
 
           <div class="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex justify-end items-center gap-4">
             <button @click="showModal = false" class="text-sm font-semibold text-gray-500 hover:text-gray-700 transition">Cancel</button>
-            <button @click="saveQuestion" class="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-md transition">Save Question</button>
+            <button 
+              @click="saveQuestion" 
+              :disabled="submitting"
+              class="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-bold shadow-md transition disabled:opacity-50"
+            >
+              {{ submitting ? 'Saving...' : 'Save Question' }}
+            </button>
           </div>
           
         </div>
@@ -118,6 +154,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from "@/services/api";
+import Swal from 'sweetalert2';
 
 const exams = ref([]);
 const questions = ref([]);
@@ -125,8 +162,14 @@ const showModal = ref(false);
 const searchQuery = ref('');
 const loading = ref(false);
 const selectedCorrectIndex = ref(null);
+const submitting = ref(false);
 const isEditing = ref(false);
 const editingId = ref(null);
+const pagination = ref({
+                    current_page: 1,
+                    last_page: 1,
+                    total: 0
+                  });
 
 const form = ref({
   question_text: '',
@@ -142,29 +185,39 @@ const form = ref({
 });
 const fetchExams = async () => {
   try {
-
     const response = await api.get('/instructor/exams');
-
     if (response.data?.success) exams.value = response.data.data;
-
   } catch (error) {
     console.error("Exams Fetch Error:", error.response?.data);
   }
 }
 
-const fetchQuestions = async () => {
+const fetchQuestions = async (page = 1) => {
   loading.value = true;
   try {
-    const response = await api.get('/instructor/questions');
+    const response = await api.get(`/instructor/questions?page=${page}`);
 
     if (response.data.success) {
       questions.value = response.data.data.data; 
+      
+      pagination.value = {
+        current_page: response.data.data.current_page,
+        last_page: response.data.data.last_page,
+        total: response.data.data.total
+      };
     }
     
   } catch (error) {
     console.error("Error fetching questions:", error);
   } finally {
     loading.value = false;
+  }
+};
+
+// page change handler for pagination
+const handlePageChange = (newPage) => {
+  if (newPage >= 1 && newPage <= pagination.value.last_page) {
+    fetchQuestions(newPage);
   }
 };
 
@@ -184,12 +237,12 @@ const editQuestion = (q) => {
   form.value.mark = q.mark || 1;
 
   form.value.options = q.options.map((opt, index) => {
-    if (Number(opt.is_correct) === 1 || opt.is_correct === true) {
+    if (Number(opt.is_correct) === 1) {
         selectedCorrectIndex.value = index;
     }  
     return { 
       text: opt.option_text,
-      is_correct: !!opt.is_correct 
+      is_correct: Number(opt.is_correct) === 1 
     };
   });
 
@@ -197,15 +250,32 @@ const editQuestion = (q) => {
 };
 
 const deleteQuestion = async (id) => {
-  if (!confirm("Are you sure you want to delete this question?")) return;
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#4F46E5',
+    cancelButtonColor: '#EF4444',
+    confirmButtonText: 'Yes, delete it!'
+  });
 
-  try {
-    await api.delete(`/instructor/questions/${id}`);
-    alert("Question deleted successfully.");
-    await fetchQuestions();
-
-  } catch (error) {
-    console.error("Delete Error:", error);
+  if (result.isConfirmed) {
+    try {
+      await api.delete(`/instructor/questions/${id}`);
+      
+      Swal.fire({
+        icon: 'success',
+        title: 'Deleted!',
+        text: 'Question has been deleted.',
+        timer: 2000,
+        showConfirmButton: false
+      });
+      
+      await fetchQuestions(pagination.value.current_page);
+    } catch (error) {
+      Swal.fire('Error!', 'Failed to delete question.', 'error');
+    }
   }
 };
 
@@ -243,14 +313,21 @@ const addOption = () => form.value.options.push({ text: '', is_correct: false })
 const removeOption = (index) => form.value.options.length > 2 && form.value.options.splice(index, 1);
 
 const saveQuestion = async () => {
+  if (submitting.value) return;
+
   try {
+    submitting.value = true;
     if (!form.value.question_text || !form.value.exam_id) {
-      alert("Please fill all required fields.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please fill all required fields!',
+      });
       return;
     }
 
     if (selectedCorrectIndex.value === null) {
-      alert("Please select the correct answer.");
+      Swal.fire('Error', 'Please select the correct answer.', 'error');
       return;
     }
 
@@ -283,16 +360,30 @@ const saveQuestion = async () => {
       : await api.post(url, payload);
 
     if (response.status === 201 || response.status === 200) {
-      alert(isEditing.value ? 'Updated successfully!' : 'Saved successfully!');
+      Swal.fire({
+        icon: 'success',
+        title: isEditing.value ? 'Updated!' : 'Saved!',
+        text: 'Question successfully saved in the bank.',
+        timer: 2000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end'
+      });
+
       showModal.value = false; 
       resetForm();             
-      await fetchQuestions();  
+      await fetchQuestions(pagination.value.current_page);  
     }
+    submitting.value = false;
 
   } catch (error) {
     console.error("Error:", error.response?.data);
     const serverErrors = error.response?.data?.errors;
-    alert(serverErrors ? Object.values(serverErrors).flat().join('\n') : "Something went wrong!");
+    Swal.fire({
+      icon: 'error',
+      title: 'Submission Failed',
+      text: serverErrors ? Object.values(serverErrors).flat().join('\n') : "Something went wrong!"
+    });
   }
 };
 </script>

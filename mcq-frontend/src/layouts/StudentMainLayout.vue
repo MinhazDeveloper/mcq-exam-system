@@ -68,6 +68,8 @@
         </router-view> 
       </main>
       
+      <Footer />
+
     </div>    
   </div>
   
@@ -75,6 +77,7 @@
 
 <script setup>
 import Header from '@/components/student/StudentHeader.vue'
+import Footer from '@/components/student/StudentFooter.vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { LayoutDashboard, FileText, History } from 'lucide-vue-next';

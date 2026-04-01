@@ -83,12 +83,15 @@
         </router-view> 
       </main>
       
+      <Footer />
+
     </div>    
   </div>
 </template>
 
 <script setup>
 import Header from '@/components/admin/AdminHeader.vue'
+import Footer from '@/components/admin/AdminFooter.vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { LayoutDashboard, Users, BookOpenCheck, History } from 'lucide-vue-next';

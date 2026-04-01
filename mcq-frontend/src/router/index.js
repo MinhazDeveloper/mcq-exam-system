@@ -12,6 +12,7 @@ import InstructorMainLayout from '@/layouts/InstructorMainLayout.vue';
 import InstructorDashboard from '@/views/instructor/InstructorDashboard.vue'
 import InstructorExam from '@/views/instructor/InstructorExam.vue'
 import InstructorQuestion from '@/views/instructor/InstructorQuestion.vue'
+import InstructorQuestionAI from '@/views/instructor/InstructorQuestionAI.vue'
 //student
 import StudentMainLayout from '@/layouts/StudentMainLayout.vue';
 import StudentExamList from '@/views/student/StudentExamList.vue'
@@ -86,6 +87,11 @@ const routes = [
         path: 'question', 
         name: 'InstructorQuestion',
         component: InstructorQuestion
+      },
+      {
+        path: 'question-AI', 
+        name: 'InstructorQuestionAI',
+        component: InstructorQuestionAI
       },
     ]
   },

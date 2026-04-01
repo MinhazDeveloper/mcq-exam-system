@@ -6,6 +6,7 @@ use App\Http\Controllers\ExamController;
 use App\Http\Controllers\InstructorController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\StudentController;
+Use App\Http\Controllers\QuestionAIController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -57,6 +58,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/stats', [InstructorController::class, 'getStats']);
         Route::apiResource('exams', ExamController::class);
         Route::apiResource('questions', QuestionController::class);
+        Route::middleware(['throttle:gemini_api'])->post('questions/generate-from-ai', [QuestionAIController::class, 'generateFromMedia']);
+        Route::post('/questions/bulk-store', [QuestionAIController::class, 'bulkStore']);
 
     });
     // for students

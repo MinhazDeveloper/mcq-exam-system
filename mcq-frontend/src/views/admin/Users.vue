@@ -97,6 +97,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import UserModal from './UserModal.vue'
+import Swal from 'sweetalert2';
 import api from "@/services/api";
 
 const authStore = useAuthStore()
@@ -176,18 +177,47 @@ const filteredUsers = computed(() => {
 
 const deleteUser = async (id) => {
 
-  if (!confirm('Are you sure you want to delete this user?')) return;
-
-  try {
-    const response = await api.delete(`/admin/user/delete/${id}`);
-
-    if (response.data.success || response.status === 200) {
-      alert('User deleted successfully!');
-      fetchUsers();
+   const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: "You won't be able to revert this user deletion!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#F43F5E', // Rose 500
+    cancelButtonColor: '#94A3B8',  // Slate 400
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'Cancel',
+    customClass: {
+      popup: 'rounded-[24px]', // আপনার UI এর সাথে মিল রাখতে
+      confirmButton: 'rounded-xl px-6 py-2.5 font-bold',
+      cancelButton: 'rounded-xl px-6 py-2.5 font-bold'
     }
-  } catch (error) {
-    console.error("Error deleting user:", error);
-    alert(error.response?.data?.message || 'Failed to delete user');
+  });
+
+  if (result.isConfirmed) {
+    try {
+      const response = await api.delete(`/admin/user/delete/${id}`);
+
+      if (response.data.success || response.status === 200) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Deleted!',
+          text: 'User has been removed successfully.',
+          timer: 2000,
+          showConfirmButton: false,
+          toast: true,
+          position: 'top-end'
+        });
+        fetchUsers();
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: error.response?.data?.message || 'Failed to delete user',
+        confirmButtonColor: '#4F46E5'
+      });
+    }
   }
 };
 

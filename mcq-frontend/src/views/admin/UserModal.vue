@@ -47,6 +47,7 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import Swal from 'sweetalert2';
 import api from "@/services/api";
 
 const props = defineProps({
@@ -101,12 +102,31 @@ const handleSubmit = async () => {
    
     // Success
     if (response.data.success || response.status === 200 || response.status === 201) {
-      alert(isEdit ? 'User updated!' : 'New user added!')
-      emit('refresh')
-      emit('close')
+      Swal.fire({
+        icon: 'success',
+        title: isEdit ? 'User Updated!' : 'User Added!',
+        text: isEdit ? 'The user details have been updated successfully.' : 'New user has been created.',
+        timer: 2000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end',
+        background: '#ffffff',
+        iconColor: '#4F46E5', 
+      });
+      emit('refresh');
+      emit('close');
+      resetForm();
     }
   } catch (error) {
-    alert(error.response?.data?.message || 'something wrong')
+    Swal.fire({
+      icon: 'error',
+      title: 'Action Failed',
+      text: error.response?.data?.message || 'Something went wrong. Please try again.',
+      confirmButtonColor: '#4F46E5',
+      customClass: {
+        popup: 'rounded-[24px]'
+      }
+    });
   } finally {
     submitting.value = false
   }

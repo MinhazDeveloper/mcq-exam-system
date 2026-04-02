@@ -50,7 +50,7 @@
               ‹ Previous
             </button>
             <button 
-              @click="nextQuestion"
+              @click="handleNextOrFinish"
               class="px-10 py-3 bg-[#4F46E5] text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all flex items-center gap-2"
             >
               {{ currentQuestionIndex === totalQuestions - 1 ? 'Finish' : 'Next' }} ›
@@ -93,7 +93,7 @@
             <div class="flex items-center gap-3 text-[12px] text-gray-500 font-medium"><span class="w-3 h-3 rounded-full bg-gray-100"></span> Not Answered</div>
           </div>
 
-          <button @click="submitExam(false)" class="w-full bg-red-50 text-red-500 py-4 rounded-xl font-bold border border-red-100 hover:bg-red-100 transition-colors">
+          <button @click="handleManualSubmit" class="w-full bg-red-50 text-red-500 py-4 rounded-xl font-bold border border-red-100 hover:bg-red-100 transition-colors">
             Submit Exam
           </button>
         </div>
@@ -111,6 +111,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from "@/services/api";
+import Swal from 'sweetalert2';
 
 const route = useRoute();
 const router = useRouter();
@@ -121,6 +122,7 @@ const studentId = localStorage.getItem('student_id') || 'guest';
 // Storage Keys
 const TIME_KEY = `exam_time_${studentId}_${examId}`;
 const ANSWERS_KEY = `exam_answers_${studentId}_${examId}`;
+const INDEX_KEY = `exam_index_${studentId}_${examId}`;
 
 const timeLeft = ref(0);
 let timerInterval = null;
@@ -147,14 +149,15 @@ const startTimer = () => {
       localStorage.setItem(TIME_KEY, timeLeft.value);
     } else {
       clearInterval(timerInterval);
-      autoSubmitExam();
+      submitExam(true); // Automatically triggers submission when time ends
+
     }
   }, 1000);
 };
 
-const autoSubmitExam = () => {
-  submitExam(true);
-};
+// const autoSubmitExam = () => {
+//   submitExam(true);
+// };
 
 const fetchQuestions = async () => {
   try {
@@ -182,6 +185,10 @@ const fetchQuestions = async () => {
       selectedOptions.value = new Array(totalQuestions.value).fill(null);
     }
     
+    const savedIndex = localStorage.getItem(INDEX_KEY);
+    if (savedIndex) {
+      currentQuestionIndex.value = parseInt(savedIndex);
+    }
     startTimer();
   } catch (error) {
     console.error("Error fetching questions:", error);
@@ -196,63 +203,109 @@ const selectOption = (index) => {
   localStorage.setItem(ANSWERS_KEY, JSON.stringify(selectedOptions.value));
 };
 
-const clearExamStorage = () => {
-  localStorage.removeItem(TIME_KEY);
-  localStorage.removeItem(ANSWERS_KEY);
-};
+const handleManualSubmit = async () => {
+  const result = await Swal.fire({
+    title: 'Submit Exam?',
+    text: "You won't be able to change your answers after submission!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#4F46E5',
+    cancelButtonColor: '#94A3B8',
+    confirmButtonText: 'Yes, Submit',
+    cancelButtonText: 'No, Keep Reviewing',
+    customClass: {
+      popup: 'rounded-[24px]',
+      confirmButton: 'rounded-xl font-bold px-6 py-2.5',
+      cancelButton: 'rounded-xl font-bold px-6 py-2.5'
+    }
+  });
 
-const submitExam = async (isAuto = false) => {
-  if (submitting.value) return;
-  if (!isAuto && !confirm("Are you sure you want to submit the exam?")) return;
-  
-  submitting.value = true;
-  window.onbeforeunload = null;
-  if (timerInterval) clearInterval(timerInterval);
-
-  const payload = {
-    exam_id: examId,
-    answers: questions.value.map((q, index) => {
-      const selectedIdx = selectedOptions.value[index];
-      return {
-        question_id: q.id,
-        selected_option_id: (selectedIdx !== null && q.options && q.options[selectedIdx]) 
-          ? q.options[selectedIdx].id 
-          : null
-      };
-    })
-  };
-
-  try {
-    const response = await api.post('/student/exam/submit', payload);
-    clearExamStorage();
-    alert(isAuto ? 'Time Expired! Submitted automatically.' : 'Exam Submitted Successfully!');
-    router.push('/student/dashboard');
-  } catch (error) {
-    console.error("Submit Error:", error);
-    alert('Error submitting exam. Please try again.');
-    submitting.value = false;
-  }
-};
-
-const nextQuestion = () => {
-  if (currentQuestionIndex.value < totalQuestions.value - 1) {
-    currentQuestionIndex.value++;
-  } else {
+  if (result.isConfirmed) {
     submitExam(false);
   }
 };
 
-const prevQuestion = () => {
-  if (currentQuestionIndex.value > 0) currentQuestionIndex.value--;
+const submitExam = async (isAuto = false) => {
+  if (submitting.value) return;
+  submitting.value = true;
+
+  window.onbeforeunload = null;
+  if (timerInterval) clearInterval(timerInterval);
+
+  // Show processing overlay
+  Swal.fire({
+    title: isAuto ? 'Time Expired!' : 'Submitting...',
+    text: 'Please wait while we save your answers.',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  const payload = {
+    exam_id: Number(examId),
+    answers: questions.value.map((q, index) => ({
+      question_id: q.id,
+      selected_option_id: (selectedOptions.value[index] !== null && q.options[selectedOptions.value[index]]) 
+        ? q.options[selectedOptions.value[index]].id 
+        : null
+    })),
+    time_taken: 0
+  };
+
+  try {
+    await api.post('/student/exam/submit', payload);
+    localStorage.removeItem(TIME_KEY);
+    localStorage.removeItem(ANSWERS_KEY);
+    localStorage.removeItem(INDEX_KEY);
+
+    await Swal.fire({
+      icon: 'success',
+      title: isAuto ? 'Auto-Submitted' : 'Success!',
+      text: 'Your exam has been submitted successfully.',
+      timer: 3000,
+      showConfirmButton: true,
+      confirmButtonColor: '#4F46E5',
+      customClass: {
+        popup: 'rounded-[24px]',
+      }
+    });
+
+    router.push('/student/dashboard');
+  } catch (error) {
+    console.error("Submit Error:", error);
+    const errorMsg = error.response?.data?.message || 'Something went wrong. Please try again.';
+    Swal.fire({
+      icon: 'error',
+      title: 'Submission Failed',
+      text: errorMsg,
+      confirmButtonColor: '#4F46E5'
+    });
+    submitting.value = false;
+  }
 };
+
+const handleNextOrFinish = () => {
+  if (currentQuestionIndex.value < totalQuestions.value - 1) {
+    goToQuestion(currentQuestionIndex.value + 1);
+
+  } else {
+    handleManualSubmit();
+  }
+};
+const prevQuestion = () => {
+  if (currentQuestionIndex.value > 0) goToQuestion(currentQuestionIndex.value - 1);
+};
+
 
 const goToQuestion = (index) => {
   currentQuestionIndex.value = index;
+  localStorage.setItem(INDEX_KEY, index);
+
 };
 
 const getQuestionStatusClass = (index) => {
   if (currentQuestionIndex.value === index) return 'border-indigo-500 text-indigo-600 ring-2 ring-indigo-100 ring-offset-1';
-  if (markedForReview.value.has(index)) return 'bg-yellow-400 border-yellow-400 text-white';
   if (selectedOptions.value[index] !== null) return 'bg-green-400 border-green-400 text-white';
   return 'bg-gray-50 border-gray-200 text-gray-400';
 };
@@ -260,7 +313,7 @@ const getQuestionStatusClass = (index) => {
 onMounted(() => {
   fetchQuestions();
   window.onbeforeunload = (e) => {
-    if (timeLeft.value > 0) {
+    if (timeLeft.value > 0 && !submitting.value) {
       e.preventDefault();
       e.returnValue = '';
     }

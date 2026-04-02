@@ -65,6 +65,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import apiClient from '@/api/axios';
 import { GoogleSignInButton } from 'vue3-google-signin';
+import Swal from 'sweetalert2';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -83,6 +84,18 @@ const handleLogin = async () => {
     const { token, user } = response.data;
     
     authStore.setAuth(token, user);
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: 'Login successful. Redirecting...',
+      timer: 1500,
+      showConfirmButton: false,
+      customClass: {
+        popup: 'rounded-[24px]',
+      }
+    });
+
     // Role-based redirection
     if (user.role === 'admin') {
       router.push('/admin/dashboard');
@@ -91,15 +104,23 @@ const handleLogin = async () => {
     } else {
       router.push('/student/dashboard');
     }
-  } catch (error) {
-    // alert(error.response?.data?.message || 'Login failed. Please try again.');
-    
+  } catch (error) {    
     console.log('FULL ERROR:', error);
     console.log('ERROR RESPONSE:', error.response);
     console.log('ERROR DATA:', error.response?.data);
     console.log('STATUS:', error.response?.status);
 
-    alert(error.response?.data?.message || 'Login failed. Please try again.');
+    // SweetAlert Error Popup
+    Swal.fire({
+      icon: 'error',
+      title: 'Login Failed',
+      text: error.response?.data?.message || 'Invalid credentials. Please try again.',
+      confirmButtonColor: '#4F46E5',
+      customClass: {
+        popup: 'rounded-[24px]',
+        confirmButton: 'rounded-xl px-6 py-2'
+      }
+    });
     
   } finally {
     isLoading.value = false;

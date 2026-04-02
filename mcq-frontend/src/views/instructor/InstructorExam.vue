@@ -108,6 +108,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import api from "@/services/api";
+import Swal from 'sweetalert2';
 
 const isModalOpen = ref(false)
 const isEditMode = ref(false)
@@ -115,8 +116,8 @@ const currentExamId = ref(null)
 const exams = ref([])
 
 const statusClasses = {
-  Published: 'bg-green-100 text-green-700',
-  Unpublished: 'bg-red-100 text-gray-600',
+  Published: 'bg-green-50 text-green-600 border-green-100',
+  Unpublished: 'bg-slate-50 text-slate-400 border-slate-100',
 }
 
 const form = reactive({
@@ -139,7 +140,6 @@ const fetchExams = async () => {
       questions_count: exam.questions_count ?? 0,
       status: exam.is_published ? 'Published' : 'Unpublished',
       lastModified: exam.updated_at ? new Date(exam.updated_at).toLocaleDateString('en-GB') : 'N/A'
-
     }));
   } catch (error) { 
     console.error(error); }
@@ -169,7 +169,12 @@ const openModalForEdit = (exam) => {
 const handleSubmit = async () => {
 
   if (Number(form.pass_marks) > Number(form.total_marks)) {
-    alert('Pass marks cannot be greater than total marks!');
+    Swal.fire({
+      icon: 'error',
+      title: 'Validation Error',
+      text: 'Pass marks cannot be greater than total marks!',
+      confirmButtonColor: '#4F46E5',
+    });
     return;
   }
 
@@ -191,19 +196,66 @@ const handleSubmit = async () => {
     if (response.data.success) {
       await fetchExams();
       isModalOpen.value = false;
-      alert(isEditMode.value ? 'Exam updated successfully!' : 'Exam created successfully!');
+      Swal.fire({
+        icon: 'success',
+        title: isEditMode.value ? 'Exam Updated!' : 'Exam Created!',
+        text: 'Changes have been saved successfully.',
+        timer: 2000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end'
+      });
     }
     
-  } catch (error) { alert('Operation failed!'); }
+  } catch (error) {
+     Swal.fire({
+        icon: 'error',
+        title: 'Operation Failed',
+        text: 'An error occurred while saving the exam.',
+        confirmButtonColor: '#4F46E5',
+      });
+  }
 }
 
 const handleDelete = async (id) => {
-  if (!confirm('Are you sure you want to delete this exam?')) return;
-  try {
-    await api.delete(`/instructor/exams/${id}`);
-    alert('Exam deleted successfully!');
-    await fetchExams();
-  } catch (error) { alert('Delete failed!'); }
+  const result = await Swal.fire({
+    title: 'Delete Exam?',
+    text: "This action cannot be undone!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#F43F5E',
+    cancelButtonColor: '#94A3B8',
+    confirmButtonText: 'Yes, delete it!',
+    customClass: {
+      popup: 'rounded-[24px]',
+      confirmButton: 'rounded-xl font-bold px-6 py-2.5',
+      cancelButton: 'rounded-xl font-bold px-6 py-2.5'
+    }
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await api.delete(`/instructor/exams/${id}`);
+      // Added deletion success toast
+      Swal.fire({
+        icon: 'success',
+        title: 'Deleted!',
+        text: 'Exam has been removed.',
+        timer: 1500,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end'
+      });
+      await fetchExams();
+    } catch (error) { 
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to delete the exam.',
+        confirmButtonColor: '#4F46E5'
+      });
+    }
+  }
 }
 
 onMounted(fetchExams);

@@ -77,6 +77,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import apiClient from '@/api/axios'
+import Swal from 'sweetalert2'
 
 const router = useRouter()
 const loading = ref(false)
@@ -93,10 +94,37 @@ const handleRegister = async () => {
   loading.value = true
   try {
     await apiClient.post('/auth/register', form)
-    alert('Registration successful. Please login.')
+    await Swal.fire({
+      icon: 'success',
+      title: 'Success!',
+      text: 'Registration successful. Please login to continue.',
+      timer: 2000,
+      showConfirmButton: false,
+      customClass: {
+        popup: 'rounded-[24px]',
+      }
+    })
     router.push('/')
   } catch (error) {
-    alert(error.response?.data?.message || 'Registration failed')
+    console.error('Registration Error:', error.response?.data)
+
+    const errorData = error.response?.data
+    let errorMessage = errorData?.message || 'Registration failed'
+
+    if (errorData?.errors) {
+      errorMessage = Object.values(errorData.errors).flat().join('<br>')
+    }
+
+    Swal.fire({
+      icon: 'error',
+      title: 'Registration Failed',
+      html: errorMessage,
+      confirmButtonColor: '#4F46E5',
+      customClass: {
+        popup: 'rounded-[24px]',
+        confirmButton: 'rounded-xl px-6 py-2'
+      }
+    })
   } finally {
     loading.value = false
   }

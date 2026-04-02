@@ -79,6 +79,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from "@/services/api";
+import Swal from 'sweetalert2';
 
 const results = ref([]);
 const loading = ref(true);
@@ -92,7 +93,15 @@ const fetchHistory = async () => {
     results.value = response.data.data || [];
   } catch (error) {
     console.error("Error fetching history:", error);
-    alert("Failed to load exam history.");
+    Swal.fire({
+      icon: 'error',
+      title: 'Fetch Failed',
+      text: error.response?.data?.message || 'Could not load student exam history.',
+      confirmButtonColor: '#4F46E5',
+      customClass: {
+        popup: 'rounded-[24px]'
+      }
+    });
   } finally {
     loading.value = false;
   }
